@@ -41,15 +41,19 @@ export default function GameScreen() {
   return (
     <section className="game-screen">
       <div className="game-header">
-        <span className="room-code">{view.gameId}</span>
+        <span className="room-code">{room.roomId}</span>
         <span className="phase-banner">
-          {view.phase} · turn: {nameOf(view, view.currentPlayerId)}
+          {myTurn ? 'your turn' : `${nameOf(view, view.currentPlayerId)}'s turn`}
           {view.cactusCallerId && <> · 🌵 called by {nameOf(view, view.cactusCallerId)}</>}
         </span>
         <button className="leave-btn" onClick={leave}>
           Leave
         </button>
       </div>
+
+      {view.phase === 'peek' && (
+        <div className="peek-banner">👀 Peek phase — memorize your bottom two cards before it ends.</div>
+      )}
 
       <Table />
       <ActionBar myTurn={myTurn} />

@@ -1,6 +1,7 @@
 import type { RedactedSlot } from '@engine/types';
 import { useCactusStore } from '../store';
-import { cardLabel, isRed } from '../cardLabel';
+import { isValidTarget } from '../targeting';
+import PlayingCard from './PlayingCard';
 
 interface Props {
   playerId: string;
@@ -11,31 +12,37 @@ export default function BoardSlot({ playerId, slot }: Props) {
   const room = useCactusStore((s) => s.room);
   const remembered = useCactusStore((s) => s.known[slot.slotId]);
   const clickMode = useCactusStore((s) => s.clickMode);
+  const jackFirst = useCactusStore((s) => s.jackFirst);
+  const qLookTarget = useCactusStore((s) => s.view?.pendingAction?.qLookTarget ?? null);
   const handleSlotClick = useCactusStore((s) => s.handleSlotClick);
 
   const mine = playerId === room?.sessionId;
   const visibleCard = slot.card ?? null;
-  const displayCard = visibleCard ?? remembered ?? null;
-  const selectable = clickMode !== null;
+  const target = { playerId, slotId: slot.slotId };
+  const isChosenFirst = jackFirst?.playerId === playerId && jackFirst?.slotId === slot.slotId;
+  const valid = isValidTarget(clickMode, mine, target, { jackFirst, qLookTarget });
 
-  const label = visibleCard ? cardLabel(visibleCard) : remembered ? `(${cardLabel(remembered)})` : '🂠';
+  // A "remembered" card is only in this client's local memory (a past peek),
+  // not something the server has confirmed as face-up — shown distinctly.
+  const displayCard = visibleCard ?? remembered ?? null;
+  const isRemembered = !visibleCard && !!remembered;
 
   return (
     <button
       type="button"
-      className={[
-        'board-slot',
-        isRed(displayCard) ? 'red' : '',
-        selectable ? 'selectable' : '',
-        slot.faceUp ? 'face-up' : '',
-      ]
+      className={['board-slot', valid ? 'selectable' : '', isChosenFirst ? 'chosen' : '']
         .filter(Boolean)
         .join(' ')}
-      disabled={!selectable}
+      disabled={!valid}
       onClick={() => handleSlotClick(playerId, slot.slotId)}
       title={mine ? 'your card' : 'opponent card'}
     >
-      {label}
+      <PlayingCard
+        card={displayCard}
+        faceDown={!displayCard}
+        size="sm"
+        className={isRemembered ? 'remembered' : ''}
+      />
     </button>
   );
 }

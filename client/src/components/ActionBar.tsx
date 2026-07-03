@@ -1,5 +1,6 @@
 import { useCactusStore } from '../store';
-import { cardLabel } from '../cardLabel';
+import { FORCED_MODES } from '../targeting';
+import PlayingCard from './PlayingCard';
 
 const ACTION_RANKS = new Set(['7', '8', '9', '10', 'J', 'Q']);
 
@@ -61,9 +62,10 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
 
       {holding && view.drawnCard && (
         <div className="drawn-panel">
-          <span>
-            Drawn: <strong>{cardLabel(view.drawnCard)}</strong>
-          </span>
+          <div className="drawn-card-display">
+            <PlayingCard card={view.drawnCard} size="md" />
+            <span className="drawn-card-caption">drawn</span>
+          </div>
           <button
             onClick={() => setClickMode('swap', 'Click one of YOUR slots to swap the drawn card into')}
           >
@@ -76,7 +78,7 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
         </div>
       )}
 
-      {clickMode && (
+      {clickMode && !FORCED_MODES.has(clickMode) && (
         <button className="cancel-btn" onClick={() => setClickMode(null)}>
           Cancel
         </button>

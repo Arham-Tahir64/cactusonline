@@ -168,6 +168,7 @@ export class CactusGame {
             type: s.pendingAction.type,
             actingPlayerId: s.pendingAction.actingPlayerId,
             stage: s.pendingAction.stage,
+            qLookTarget: s.pendingAction.qLookTarget,
           }
         : null,
       pendingGive: s.pendingGive ? { ...s.pendingGive } : null,

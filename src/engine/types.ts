@@ -121,7 +121,13 @@ export interface PlayerView {
   drawnCard: Card | null;
   cactusCallerId: string | null;
   matchWindowOpen: boolean;
-  pendingAction: { type: ActionType; actingPlayerId: string; stage: string } | null;
+  pendingAction: {
+    type: ActionType;
+    actingPlayerId: string;
+    stage: string;
+    /** Set once the Q look has happened, so clients can block re-picking that same card. */
+    qLookTarget: BoardTarget | null;
+  } | null;
   pendingGive: PendingGive | null;
   /** Your own peek cards during the peek phase (bottom two), null otherwise. */
   peekCards: { slotId: string; card: Card }[] | null;
