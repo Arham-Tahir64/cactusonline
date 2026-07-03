@@ -384,12 +384,13 @@ export class CactusGame {
       return { outcome: 'correct-own', card };
     }
 
-    // Incorrect: attempter permanently gains the misplayed card face-down.
-    // (The failed attempt reveals the card to everyone at the table momentarily,
-    // then it goes face-down onto the attempter's board.)
-    victim.board.splice(slotIndex, 1);
+    // Incorrect: the misplayed card goes back to its owner (it never leaves the
+    // slot), and the attempter draws a penalty card from the draw pile
+    // face-down onto their own board.
     const attacker = this.getPlayer(playerId);
-    attacker.board.push(this.makeSlot(playerId, card));
+    if (this.state.drawPile.length === 0) this.reshuffleDiscardIntoDrawPile();
+    const penalty = this.state.drawPile.pop();
+    if (penalty) attacker.board.push(this.makeSlot(playerId, penalty));
     return { outcome: 'incorrect', card };
   }
 

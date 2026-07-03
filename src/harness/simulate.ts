@@ -58,6 +58,11 @@ function tryStacks(): void {
         console.log(
           `  ⚡ ${nameOf(bot.id)} stacks ${label(result.card)} from ${nameOf(victim.id)}'s board (${result.outcome})`,
         );
+        if (result.outcome === 'incorrect') {
+          // Card stays put; the failed flip showed us what it really is.
+          mem.set(slot.slotId, result.card.rank);
+          return;
+        }
         forget(slot.slotId);
         if (result.outcome === 'correct-opponent') {
           // Give away a card we know nothing about if possible (keep known-good cards).

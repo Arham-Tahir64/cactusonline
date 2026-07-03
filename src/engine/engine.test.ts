@@ -247,21 +247,40 @@ describe('match window (losing-cards rule)', () => {
     expect(game.getPlayer('p2').board.at(-1)!.faceUp).toBe(false);
   });
 
-  it('incorrect stack: attempter gains the misplayed card, window stays open', () => {
-    const game = basicGame([c('5', 'H')]);
+  it('incorrect stack: card goes back, attempter draws a penalty card', () => {
+    const game = basicGame([c('5', 'H'), c('9', 'D')]);
     game.drawFromDeck('p1');
-    game.discardDrawnCard('p1'); // 5♥ on discard
+    game.discardDrawnCard('p1'); // 5♥ on discard, 9♦ left in the draw pile
 
     // p2 wrongly stacks p1's A♠ (not a 5).
     const result = game.attemptMatch('p2', { playerId: 'p1', slotId: slotId(game, 'p1', 0) });
     expect(result.outcome).toBe('incorrect');
     expect(result.outcome === 'incorrect' && result.card.id).toBe('AS');
-    expect(game.getPlayer('p1').board).toHaveLength(3);
-    expect(game.getPlayer('p2').board).toHaveLength(5); // grew by one
-    expect(game.getPlayer('p2').board.at(-1)!.card.id).toBe('AS');
+
+    // The misplayed card stays where it was.
+    expect(game.getPlayer('p1').board).toHaveLength(4);
+    expect(game.getPlayer('p1').board[0]!.card.id).toBe('AS');
+
+    // The attempter grew by one: a face-down penalty card off the draw pile.
+    expect(game.getPlayer('p2').board).toHaveLength(5);
+    expect(game.getPlayer('p2').board.at(-1)!.card.id).toBe('9D');
+    expect(game.getPlayer('p2').board.at(-1)!.faceUp).toBe(false);
+    expect(game.getState().drawPile).toHaveLength(0);
 
     // The window is still open for a correct attempt.
     expect(game.getState().matchWindow?.open).toBe(true);
+  });
+
+  it('penalty draw reshuffles the discard pile if the draw pile is empty', () => {
+    const game = basicGame([c('5', 'H')]); // draw pile empty after p1's draw
+    game.drawFromDeck('p1');
+    game.discardDrawnCard('p1'); // discard: [K♣, 5♥]
+
+    const result = game.attemptMatch('p2', { playerId: 'p1', slotId: slotId(game, 'p1', 0) });
+    expect(result.outcome).toBe('incorrect');
+    // Penalty came from reshuffling the K♣ under the top discard.
+    expect(game.getPlayer('p2').board.at(-1)!.card.id).toBe('KC');
+    expect(game.getState().discardPile.map((x) => x.rank)).toEqual(['5']);
   });
 
   it('the window closes when the next player takes their turn action', () => {

@@ -28,7 +28,7 @@ npm run simulate -- 42  # …with a fixed seed for a reproducible game
 
 ### Rule interpretations chosen (PRD §2.5 / §2.7 defaults)
 
-- **Incorrect stack:** implemented literally per the PRD — the misplayed card moves face-down onto the attempter's board (revealed to the table by the failed attempt). If it was the attempter's own card, board size is net unchanged. A failed attempt does *not* close the window.
+- **Incorrect stack:** the misplayed card goes back to its owner (it never leaves the slot), and the attempter draws a penalty card from the draw pile face-down onto their own board (reshuffling the discard pile if the draw pile is empty). A failed attempt does *not* close the window.
 - **Give with an empty board:** a stacker who correctly stacks an opponent's card but has no cards left simply skips the give.
 - **Deck exhaustion:** discard pile (minus its top card) is reshuffled into a new draw pile.
 - **Final window:** after the last final-round turn, the last discard keeps its normal match window; the reveal fires once that window closes (or a stack resolves it).
