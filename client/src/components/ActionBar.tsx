@@ -1,0 +1,86 @@
+import { useCactusStore } from '../store';
+import { cardLabel } from '../cardLabel';
+
+const ACTION_RANKS = new Set(['7', '8', '9', '10', 'J', 'Q']);
+
+export default function ActionBar({ myTurn }: { myTurn: boolean }) {
+  const view = useCactusStore((s) => s.view);
+  const send = useCactusStore((s) => s.send);
+  const setClickMode = useCactusStore((s) => s.setClickMode);
+  const clickMode = useCactusStore((s) => s.clickMode);
+  const prompt = useCactusStore((s) => s.prompt);
+
+  if (!view) return null;
+
+  const canAct =
+    myTurn &&
+    view.turnStage === 'awaiting-draw' &&
+    (view.phase === 'playing' || view.phase === 'final-round') &&
+    !view.pendingGive;
+
+  const holding = myTurn && view.turnStage === 'holding-drawn-card' && view.drawnCard;
+
+  return (
+    <div className="action-bar">
+      {prompt && <div className="prompt-banner">{prompt}</div>}
+
+      {!holding && (
+        <div className="turn-actions">
+          <button disabled={!canAct} onClick={() => send('draw-deck')}>
+            Draw from deck
+          </button>
+          <button
+            disabled={!canAct}
+            onClick={() =>
+              setClickMode(
+                'take-discard',
+                'Taking discard: click one of YOUR slots to swap it into (committed!)',
+              )
+            }
+          >
+            Take discard
+          </button>
+          <button
+            disabled={!canAct || view.phase !== 'playing'}
+            onClick={() => {
+              if (confirm('Call Cactus? This starts the final round and cannot be undone.')) {
+                send('call-cactus');
+              }
+            }}
+          >
+            Call CACTUS
+          </button>
+          <button
+            disabled={!view.matchWindowOpen}
+            onClick={() => setClickMode('stack', 'STACK: click any card you think matches the discard')}
+          >
+            Stack! (match)
+          </button>
+        </div>
+      )}
+
+      {holding && view.drawnCard && (
+        <div className="drawn-panel">
+          <span>
+            Drawn: <strong>{cardLabel(view.drawnCard)}</strong>
+          </span>
+          <button
+            onClick={() => setClickMode('swap', 'Click one of YOUR slots to swap the drawn card into')}
+          >
+            Swap into a slot…
+          </button>
+          <button onClick={() => send('discard-drawn')}>Discard it</button>
+          <button disabled={!ACTION_RANKS.has(view.drawnCard.rank)} onClick={() => send('play-action')}>
+            Play action
+          </button>
+        </div>
+      )}
+
+      {clickMode && (
+        <button className="cancel-btn" onClick={() => setClickMode(null)}>
+          Cancel
+        </button>
+      )}
+    </div>
+  );
+}

@@ -129,6 +129,11 @@ export class CactusGame {
     return player;
   }
 
+  /** Mark a player as (dis)connected; game state is otherwise held for them. */
+  setConnected(playerId: string, connected: boolean): void {
+    this.getPlayer(playerId).isConnected = connected;
+  }
+
   /** Redacted view for one client: face-down card faces are omitted entirely. */
   getPlayerView(playerId: string): PlayerView {
     const s = this.state;

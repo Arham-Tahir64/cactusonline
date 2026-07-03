@@ -1,0 +1,313 @@
+/* Phase 3: functional, plain styling. No animation — that's Phase 5. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f4f1ec;
+  color: #222;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.75rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-title {
+  margin: 0.25rem 0;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #999;
+  background: #fff;
+  cursor: pointer;
+  min-height: 2.4rem;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button:not(:disabled):active {
+  background: #eee;
+}
+
+input {
+  font: inherit;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #999;
+}
+
+.error-text {
+  color: #b00020;
+}
+
+/* ---------- Join / Lobby ---------- */
+
+.join-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.code-input {
+  text-transform: uppercase;
+  width: 7rem;
+}
+
+.room-code {
+  font-family: monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+}
+
+.lobby-players {
+  list-style: none;
+  padding: 0;
+}
+
+.lobby-players li {
+  padding: 0.25rem 0;
+}
+
+.leave-btn {
+  margin-top: 0.75rem;
+}
+
+/* ---------- Game screen ---------- */
+
+.game-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.game-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.phase-banner {
+  font-weight: 600;
+}
+
+/* Circular table: seats are positioned in JS via left/top percentages. */
+.table {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+}
+
+.table-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  max-width: 45%;
+}
+
+.player-board {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0.35rem;
+  background: #fff;
+  text-align: center;
+}
+
+.player-board.me {
+  background: #eef3ff;
+}
+
+.player-board.current {
+  border-color: #2a8f2a;
+}
+
+.player-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.board-slot {
+  min-width: 2.6rem;
+  min-height: 2.6rem;
+  font-size: 0.85rem;
+  padding: 0.25rem;
+}
+
+.board-slot.red {
+  color: #b00020;
+}
+
+.board-slot.face-up {
+  background: #fff8dc;
+}
+
+.board-slot.selectable:not(:disabled) {
+  border-color: #2a6ff0;
+  box-shadow: 0 0 0 2px rgba(42, 111, 240, 0.25);
+}
+
+.empty-board {
+  grid-column: span 2;
+  font-size: 0.75rem;
+  color: #777;
+}
+
+/* ---------- Center pile ---------- */
+
+.center-pile {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.pile-card {
+  min-width: 2.6rem;
+  min-height: 3.6rem;
+  border: 1px solid #999;
+  border-radius: 6px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+
+.pile-card.back {
+  background: repeating-linear-gradient(45deg, #2a6ff0, #2a6ff0 4px, #1d4fb0 4px, #1d4fb0 8px);
+}
+
+.pile-card.red {
+  color: #b00020;
+}
+
+.pile-label {
+  font-size: 0.65rem;
+  text-align: center;
+  color: #555;
+}
+
+.match-window-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #b06a00;
+  white-space: nowrap;
+}
+
+/* ---------- Action bar ---------- */
+
+.action-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  position: sticky;
+  bottom: 0;
+}
+
+.prompt-banner {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1d4fb0;
+}
+
+.turn-actions,
+.drawn-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.cancel-btn {
+  align-self: flex-start;
+  font-size: 0.8rem;
+}
+
+/* ---------- Scoreboard ---------- */
+
+.scoreboard ul {
+  list-style: none;
+  padding: 0;
+}
+
+.scoreboard li {
+  padding: 0.2rem 0;
+}
+
+.scoreboard li.winner {
+  font-weight: 700;
+}
+
+/* ---------- Event log ---------- */
+
+.event-log {
+  max-height: 7rem;
+  overflow-y: auto;
+  font-size: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.4rem;
+  background: #fafafa;
+}
+
+.event-line {
+  padding: 0.1rem 0;
+}
+
+@media (max-width: 420px) {
+  .board-slot {
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    font-size: 0.75rem;
+  }
+}
