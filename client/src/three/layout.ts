@@ -33,16 +33,20 @@ export function seatTransform(seatIndex: number, seatCount: number): SeatTransfo
   return { position: [x, 0, z], rotationY: Math.atan2(x, z) };
 }
 
+/** Seat-local z of the row nearest the player — boards grow from here toward
+    the table center, so a growing board never pushes cards out of frame. */
+export const BOTTOM_ROW_Z = 0.62;
+
 /**
- * Board slots in seat-local space: 2 columns, rows growing away from the
- * table center, row-major — the same visual order as the 2D board grid,
- * with the "bottom two" (peek row) nearest the player.
+ * Board slots in seat-local space: 2 columns, row-major — the same visual
+ * order as the 2D board grid, with the "bottom two" (peek row) anchored
+ * nearest the player and extra rows extending toward the table center.
  */
 export function slotLocalPosition(slotIndex: number, slotCount: number): Vec3 {
   const rows = Math.max(1, Math.ceil(slotCount / 2));
   const col = slotIndex % 2;
   const row = Math.floor(slotIndex / 2);
   const x = (col - 0.5) * (CARD_W + SLOT_GAP);
-  const z = (row - (rows - 1) / 2) * (CARD_H + SLOT_GAP);
+  const z = BOTTOM_ROW_Z - (rows - 1 - row) * (CARD_H + SLOT_GAP);
   return [x, CARD_LIFT, z];
 }
