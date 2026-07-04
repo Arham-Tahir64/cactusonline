@@ -42,15 +42,100 @@ interface CactusState {
   jackFirst: BoardTarget | null;
   prompt: string;
   connecting: boolean;
+  /** True while automatically re-establishing a dropped connection. */
+  reconnecting: boolean;
   lastError: string | null;
 
   createGame(name: string): Promise<void>;
   joinGame(code: string, name: string): Promise<void>;
+  resumeSession(): Promise<void>;
   leave(): void;
   send(type: string, payload?: unknown): void;
   setClickMode(mode: ClickMode, prompt?: string): void;
   handleSlotClick(playerId: string, slotId: string): void;
 }
+
+// ---------------------------------------------------------------------------
+// Session persistence — lets a player rejoin their seat after a refresh or
+// connection drop, within the server's reconnection grace period (PRD §8).
+// The `known` card memory is also persisted so a refresh doesn't wipe the
+// player's memory aid (it only ever contains cards this client was shown).
+// ---------------------------------------------------------------------------
+
+const SESSION_KEY = 'cactus-session';
+const NAME_KEY = 'cactus-name';
+
+interface SavedSession {
+  token: string;
+  roomId: string;
+}
+
+function saveSession(room: Room) {
+  try {
+    localStorage.setItem(
+      SESSION_KEY,
+      JSON.stringify({ token: room.reconnectionToken, roomId: room.roomId } satisfies SavedSession),
+    );
+  } catch {
+    // Storage unavailable (private mode etc.) — reconnection just won't survive a refresh.
+  }
+}
+
+function loadSession(): SavedSession | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as SavedSession) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearSession() {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function knownKey(roomId: string) {
+  return `cactus-known:${roomId}`;
+}
+
+function persistKnown(roomId: string, known: Record<string, Card>) {
+  try {
+    localStorage.setItem(knownKey(roomId), JSON.stringify(known));
+  } catch {
+    /* ignore */
+  }
+}
+
+function loadKnown(roomId: string): Record<string, Card> {
+  try {
+    const raw = localStorage.getItem(knownKey(roomId));
+    return raw ? (JSON.parse(raw) as Record<string, Card>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function savedPlayerName(): string {
+  try {
+    return localStorage.getItem(NAME_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+function savePlayerName(name: string) {
+  try {
+    if (name.trim()) localStorage.setItem(NAME_KEY, name.trim());
+  } catch {
+    /* ignore */
+  }
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function wireRoom(
   room: Room,
@@ -67,12 +152,15 @@ function wireRoom(
     if (msg.peekCards) {
       for (const p of msg.peekCards) known[p.slotId] = p.card;
     }
+    persistKnown(room.roomId, known);
     set({ view: msg, screen: 'game', known });
   });
 
   room.onMessage('revealed', (msg: { target: BoardTarget; card: Card }) => {
+    const known = { ...get().known, [msg.target.slotId]: msg.card };
+    persistKnown(room.roomId, known);
     set({
-      known: { ...get().known, [msg.target.slotId]: msg.card },
+      known,
       events: [...get().events, { type: 'revealed', ...msg }],
     });
   });
@@ -85,7 +173,58 @@ function wireRoom(
       lastError: `${e.code}: ${e.message}`,
     }),
   );
-  room.onLeave(() => set({ events: [...get().events, { type: 'disconnected' }] }));
+  room.onLeave((code) => {
+    // Code 1000 = consented leave (we called room.leave()); anything else is
+    // an abnormal drop (network blip, server restart, phone lock) — try to
+    // silently reclaim the held seat.
+    if (code === 1000) return;
+    set({ events: [...get().events, { type: 'disconnected' }] });
+    void attemptReconnect(set, get);
+  });
+}
+
+/**
+ * Try to reclaim a held seat using the saved reconnection token. Retries with
+ * backoff to ride out short outages; gives up (and clears the stale session)
+ * once the server's grace period has clearly passed or the token is rejected.
+ */
+async function attemptReconnect(
+  set: (partial: Partial<CactusState>) => void,
+  get: () => CactusState,
+  maxAttempts = 8,
+): Promise<boolean> {
+  const saved = loadSession();
+  if (!saved) return false;
+  set({ reconnecting: true, lastError: null });
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const room = await client.reconnect(saved.token);
+      wireRoom(room, set, get);
+      saveSession(room); // the token rotates on every successful reconnect
+      set({
+        room,
+        reconnecting: false,
+        known: { ...loadKnown(room.roomId), ...get().known },
+        events: [...get().events, { type: 'reconnected' }],
+      });
+      return true; // the server rebroadcasts our view right after restoring the seat
+    } catch {
+      // Backoff: 1s, 2s, 3s… caps well inside the 5-minute server grace window.
+      await sleep(Math.min(1000 * (attempt + 1), 5000));
+    }
+  }
+
+  clearSession();
+  set({
+    reconnecting: false,
+    lastError: 'Could not reconnect to the game.',
+    screen: 'join',
+    room: null,
+    view: null,
+    lobby: null,
+  });
+  return false;
 }
 
 export const useCactusStore = create<CactusState>((set, get) => ({
@@ -100,6 +239,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
   jackFirst: null,
   prompt: '',
   connecting: false,
+  reconnecting: false,
   lastError: null,
 
   async createGame(name) {
@@ -107,6 +247,8 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     try {
       const room = await client.create('cactus', { name });
       wireRoom(room, set, get);
+      saveSession(room);
+      savePlayerName(name);
       set({ room, screen: 'lobby' });
     } catch (err) {
       set({ lastError: err instanceof Error ? err.message : String(err) });
@@ -120,6 +262,8 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     try {
       const room = await client.joinById(code.trim().toUpperCase(), { name });
       wireRoom(room, set, get);
+      saveSession(room);
+      savePlayerName(name);
       set({ room, screen: 'lobby' });
     } catch (err) {
       set({ lastError: err instanceof Error ? err.message : String(err) });
@@ -128,8 +272,21 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     }
   },
 
+  async resumeSession() {
+    // Called once on app boot: if a session survived a refresh/tab close,
+    // reclaim the seat before showing the join screen.
+    if (get().room || get().reconnecting) return;
+    const saved = loadSession();
+    if (!saved) return;
+    set({ known: loadKnown(saved.roomId) });
+    // On boot the server is reachable, so a failure means the token is stale —
+    // fail fast (2 attempts) instead of holding the player on a spinner.
+    await attemptReconnect(set, get, 2);
+  },
+
   leave() {
-    get().room?.leave();
+    clearSession();
+    get().room?.leave(); // consented → onLeave fires with code 1000, no auto-reconnect
     set({
       screen: 'join',
       room: null,
@@ -141,6 +298,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
       clickMode: null,
       jackFirst: null,
       prompt: '',
+      reconnecting: false,
     });
   },
 

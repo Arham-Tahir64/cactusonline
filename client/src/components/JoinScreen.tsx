@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useCactusStore } from '../store';
+import { savedPlayerName, useCactusStore } from '../store';
 
 export default function JoinScreen() {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(savedPlayerName);
   const [code, setCode] = useState('');
   const createGame = useCactusStore((s) => s.createGame);
   const joinGame = useCactusStore((s) => s.joinGame);
