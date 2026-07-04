@@ -42,8 +42,12 @@ interface CactusState {
   view: PlayerView | null;
   events: GameEvent[];
   scores: Scores | null;
-  /** Local-only memory of card faces this client has been shown (peeks, action looks). */
-  known: Record<string, Card>;
+  /**
+   * Transient private reveals from action-card looks (7/8/9/10, Q): slotId →
+   * card, shown for a few seconds then flipped back. Cactus is a memory game —
+   * nothing the server has revealed stays visible permanently.
+   */
+  reveals: Record<string, Card>;
   clickMode: ClickMode;
   jackFirst: BoardTarget | null;
   prompt: string;
@@ -61,11 +65,13 @@ interface CactusState {
   handleSlotClick(playerId: string, slotId: string): void;
 }
 
+/** How long an action-card look stays face-up before flipping back (PRD §7:
+    "brief timed reveal then flips back"). */
+export const REVEAL_MS = 5_000;
+
 // ---------------------------------------------------------------------------
 // Session persistence — lets a player rejoin their seat after a refresh or
 // connection drop, within the server's reconnection grace period (PRD §8).
-// The `known` card memory is also persisted so a refresh doesn't wipe the
-// player's memory aid (it only ever contains cards this client was shown).
 // ---------------------------------------------------------------------------
 
 const SESSION_KEY = 'cactus-session';
@@ -104,27 +110,6 @@ function clearSession() {
   }
 }
 
-function knownKey(roomId: string) {
-  return `cactus-known:${roomId}`;
-}
-
-function persistKnown(roomId: string, known: Record<string, Card>) {
-  try {
-    localStorage.setItem(knownKey(roomId), JSON.stringify(known));
-  } catch {
-    /* ignore */
-  }
-}
-
-function loadKnown(roomId: string): Record<string, Card> {
-  try {
-    const raw = localStorage.getItem(knownKey(roomId));
-    return raw ? (JSON.parse(raw) as Record<string, Card>) : {};
-  } catch {
-    return {};
-  }
-}
-
 export function savedPlayerName(): string {
   try {
     return localStorage.getItem(NAME_KEY) ?? '';
@@ -154,21 +139,21 @@ function wireRoom(
   });
 
   room.onMessage('view', (msg: PlayerView) => {
-    const known = { ...get().known };
-    if (msg.peekCards) {
-      for (const p of msg.peekCards) known[p.slotId] = p.card;
-    }
-    persistKnown(room.roomId, known);
-    set({ view: msg, screen: 'game', known });
+    // Peek cards render straight from the view: the server stops sending them
+    // when the peek phase ends, so they flip back down on their own.
+    set({ view: msg, screen: 'game' });
   });
 
   room.onMessage('revealed', (msg: { target: BoardTarget; card: Card }) => {
-    const known = { ...get().known, [msg.target.slotId]: msg.card };
-    persistKnown(room.roomId, known);
+    const slotId = msg.target.slotId;
     set({
-      known,
+      reveals: { ...get().reveals, [slotId]: msg.card },
       events: [...get().events, { type: 'revealed', ...msg }],
     });
+    setTimeout(() => {
+      const { [slotId]: expired, ...rest } = get().reveals;
+      if (expired) set({ reveals: rest });
+    }, REVEAL_MS);
   });
 
   room.onMessage('kicked', () => {
@@ -182,7 +167,7 @@ function wireRoom(
       view: null,
       events: [],
       scores: null,
-      known: {},
+      reveals: {},
       clickMode: null,
       jackFirst: null,
       prompt: '',
@@ -230,7 +215,6 @@ async function attemptReconnect(
       set({
         room,
         reconnecting: false,
-        known: { ...loadKnown(room.roomId), ...get().known },
         events: [...get().events, { type: 'reconnected' }],
       });
       return true; // the server rebroadcasts our view right after restoring the seat
@@ -259,7 +243,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
   view: null,
   events: [],
   scores: null,
-  known: {},
+  reveals: {},
   clickMode: null,
   jackFirst: null,
   prompt: '',
@@ -303,7 +287,6 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     if (get().room || get().reconnecting) return;
     const saved = loadSession();
     if (!saved) return;
-    set({ known: loadKnown(saved.roomId) });
     // On boot the server is reachable, so a failure means the token is stale —
     // fail fast (2 attempts) instead of holding the player on a spinner.
     await attemptReconnect(set, get, 2);
@@ -319,7 +302,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
       view: null,
       events: [],
       scores: null,
-      known: {},
+      reveals: {},
       clickMode: null,
       jackFirst: null,
       prompt: '',

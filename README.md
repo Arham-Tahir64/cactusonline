@@ -43,9 +43,9 @@ For [Fly.io](https://fly.io), [fly.toml](fly.toml) is ready: `fly launch` (accep
 - [src/engine/](src/engine/) — pure game engine (types, deck, `CactusGame` state machine). See Phase 1 notes below.
 - [src/server/](src/server/) — Colyseus room wrapping the engine, redacted state broadcast, timers, reconnection. See Phase 2 notes below.
 - [client/](client/) — React + TypeScript + Zustand + Vite client (Phase 3).
-  - `src/store.ts` — the only place that talks to the Colyseus `Room`; holds the latest redacted view, lobby state, event log, and a local "known cards" memory (peeked/action-revealed cards), plus the click-targeting state machine for action cards.
+  - `src/store.ts` — the only place that talks to the Colyseus `Room`; holds the latest redacted view, lobby state, event log, and transient private reveals (action-card looks flip back after a few seconds — it's a memory game, nothing stays visible), plus the click-targeting state machine for action cards.
   - `src/components/Table.tsx` — oval seating: "you" are always anchored at the bottom, other players distributed clockwise around an ellipse (positions computed with trig in JS, not a layout library).
-  - `src/components/BoardSlot.tsx` / `PlayerBoard.tsx` — board rendering; a slot shows the real card only when the server's redacted view includes it (face-up or during reveal), otherwise a remembered-but-unconfirmed card in parens, otherwise a card back.
+  - `src/components/BoardSlot.tsx` / `PlayerBoard.tsx` — board rendering; a slot shows the real card only when the server's redacted view includes it (face-up, final reveal, your bottom row during the peek phase, or a timed action-card look), otherwise a card back.
   - `src/components/ActionBar.tsx` — turn actions (draw/take-discard/cactus/stack) and the drawn-card panel (swap/discard/play-action).
   - `src/components/GameScreen.tsx` — drives the mandatory action-card and give-a-card sequences automatically via the server's `pendingAction`/`pendingGive` state, so the player is always told what to click next.
   - Imports engine types directly from `../src/engine` via a `@engine` alias (Vite `resolve.alias` + `tsconfig` `paths`) — the client's type of a `Card` or `PlayerView` can never drift from the server's.

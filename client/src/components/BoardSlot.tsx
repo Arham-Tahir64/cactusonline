@@ -11,7 +11,13 @@ interface Props {
 
 export default function BoardSlot({ playerId, slot }: Props) {
   const room = useCactusStore((s) => s.room);
-  const remembered = useCactusStore((s) => s.known[slot.slotId]);
+  // Private reveals are transient: your own bottom row during the peek phase
+  // (straight off the view — the server stops sending it when peek ends), and
+  // action-card looks for a few seconds. After that, players must remember.
+  const peeked = useCactusStore(
+    (s) => s.view?.peekCards?.find((p) => p.slotId === slot.slotId)?.card ?? null,
+  );
+  const revealed = useCactusStore((s) => s.reveals[slot.slotId] ?? null);
   const clickMode = useCactusStore((s) => s.clickMode);
   const jackFirst = useCactusStore((s) => s.jackFirst);
   const qLookTarget = useCactusStore((s) => s.view?.pendingAction?.qLookTarget ?? null);
@@ -23,10 +29,9 @@ export default function BoardSlot({ playerId, slot }: Props) {
   const isChosenFirst = jackFirst?.playerId === playerId && jackFirst?.slotId === slot.slotId;
   const valid = isValidTarget(clickMode, mine, target, { jackFirst, qLookTarget });
 
-  // A "remembered" card is only in this client's local memory (a past peek),
-  // not something the server has confirmed as face-up — shown distinctly.
-  const displayCard = visibleCard ?? remembered ?? null;
-  const isRemembered = !visibleCard && !!remembered;
+  const privateReveal = peeked ?? revealed;
+  const displayCard = visibleCard ?? privateReveal;
+  const isPrivateReveal = !visibleCard && !!privateReveal;
 
   return (
     <motion.button
@@ -47,7 +52,7 @@ export default function BoardSlot({ playerId, slot }: Props) {
         card={displayCard}
         faceDown={!displayCard}
         size="sm"
-        className={isRemembered ? 'remembered' : ''}
+        className={isPrivateReveal ? 'private-reveal' : ''}
       />
     </motion.button>
   );

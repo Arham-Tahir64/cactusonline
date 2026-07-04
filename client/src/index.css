@@ -377,8 +377,9 @@ button:focus-visible {
   color: #161616;
 }
 
-.remembered .playing-card.front {
-  opacity: 0.82;
+/* A card only this client can currently see (peek phase / timed action-card
+   look) — dashed border signals "private, and it will flip back". */
+.private-reveal .playing-card.front {
   border-style: dashed;
   border-color: #888;
 }
