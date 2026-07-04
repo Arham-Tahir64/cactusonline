@@ -2,7 +2,16 @@ import { Html } from '@react-three/drei';
 import type { RedactedPlayer, RedactedSlot } from '@engine/types';
 import { useCactusStore } from '../store';
 import { isValidTarget } from '../targeting';
-import { seatTransform, slotLocalPosition, BOTTOM_ROW_Z, CARD_H, CARD_W } from './layout';
+import {
+  seatTransform,
+  slotLocalPosition,
+  worldToSeatLocal,
+  BOTTOM_ROW_Z,
+  CARD_H,
+  CARD_W,
+  DECK_POS,
+  type Vec3,
+} from './layout';
 import Card3D from './Card3D';
 
 interface Props {
@@ -31,6 +40,7 @@ export default function Seat3D({ player, seatIndex, seatCount, isMe }: Props) {
           slot={slot}
           index={i}
           count={player.board.length}
+          enterFrom={worldToSeatLocal(DECK_POS, t)}
         />
       ))}
       <Html position={tagPos} center distanceFactor={11} zIndexRange={[10, 0]}>
@@ -51,11 +61,13 @@ function BoardCard3D({
   slot,
   index,
   count,
+  enterFrom,
 }: {
   playerId: string;
   slot: RedactedSlot;
   index: number;
   count: number;
+  enterFrom: Vec3;
 }) {
   // Private reveals are transient: peek phase (straight off the view) and
   // timed action-card looks. Otherwise only server-confirmed face-up cards.
@@ -74,12 +86,15 @@ function BoardCard3D({
   const valid = isValidTarget(clickMode, mine, target, { jackFirst, qLookTarget });
   const isChosenFirst = jackFirst?.playerId === playerId && jackFirst?.slotId === slot.slotId;
 
+  const privateReveal = !slot.card && !!(peeked ?? revealed);
   const display = slot.card ?? peeked ?? revealed;
   return (
     <Card3D
       card={display}
       faceDown={!display}
       position={slotLocalPosition(index, count)}
+      enterFrom={enterFrom}
+      lifted={privateReveal}
       selectable={valid}
       chosen={isChosenFirst}
       onClick={() => handleSlotClick(playerId, slot.slotId)}

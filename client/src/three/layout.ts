@@ -50,3 +50,14 @@ export function slotLocalPosition(slotIndex: number, slotCount: number): Vec3 {
   const z = BOTTOM_ROW_Z - (rows - 1 - row) * (CARD_H + SLOT_GAP);
   return [x, CARD_LIFT, z];
 }
+
+/** Convert a world-space point into a seat's local space (inverse transform),
+    e.g. so a newly dealt card can enter from the deck's position. */
+export function worldToSeatLocal(world: Vec3, seat: SeatTransform): Vec3 {
+  const dx = world[0] - seat.position[0];
+  const dz = world[2] - seat.position[2];
+  const cos = Math.cos(seat.rotationY);
+  const sin = Math.sin(seat.rotationY);
+  // Transpose of three.js's Y-rotation matrix (world → local).
+  return [dx * cos - dz * sin, world[1] - seat.position[1], dx * sin + dz * cos];
+}

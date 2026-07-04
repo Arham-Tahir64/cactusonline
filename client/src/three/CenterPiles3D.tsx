@@ -37,9 +37,11 @@ export default function CenterPiles3D() {
       )}
       {top && (
         <Card3D
+          key={top.id} // remount per card: each new discard flips in from above
           card={top}
           faceDown={false}
           position={[DISCARD_POS[0], CARD_LIFT + 0.01, DISCARD_POS[2]]}
+          enterFrom={[DISCARD_POS[0], CARD_LIFT + 1.1, DISCARD_POS[2] + 0.3]}
         />
       )}
       <Html
