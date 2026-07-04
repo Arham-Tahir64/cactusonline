@@ -221,6 +221,31 @@ button:focus-visible {
   font-weight: 700;
 }
 
+/* Floating tags inside the 3D scene (drei <Html>) */
+.seat-tag,
+.pile-tag {
+  pointer-events: none;
+  white-space: nowrap;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #f2efe9;
+  background: rgba(20, 27, 22, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+.pile-tag {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #cfc9bd;
+}
+
+.seat-tag.current {
+  border-color: #7dc37b;
+  box-shadow: 0 0 10px rgba(125, 195, 123, 0.55);
+}
+
 /* ---------- Game screen ---------- */
 
 .game-screen {

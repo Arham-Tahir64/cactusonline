@@ -1,5 +1,8 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { useCactusStore } from '../store';
+import Seat3D from './Seat3D';
+import CenterPiles3D from './CenterPiles3D';
 
 /**
  * The 3D table. Fixed per-seat camera: the scene is laid out with "you" on
@@ -14,8 +17,8 @@ export default function TableScene() {
     <div className="table-3d-wrap">
       <Canvas
         dpr={[1, 2]}
-        camera={{ position: [0, 7.2, 7.6], fov: 42, near: 0.1, far: 60 }}
-        onCreated={({ camera }) => camera.lookAt(0, 0, -0.6)}
+        camera={{ position: [0, 9.4, 8.2], fov: 44, near: 0.1, far: 60 }}
+        onCreated={({ camera }) => camera.lookAt(0, 0, 0.9)}
       >
         <color attach="background" args={['#141b16']} />
         <ambientLight intensity={0.75} />
@@ -23,9 +26,37 @@ export default function TableScene() {
         <directionalLight position={[-6, 8, -4]} intensity={0.25} />
         <Suspense fallback={null}>
           <TableSurface />
+          <Seats />
+          <CenterPiles3D />
         </Suspense>
       </Canvas>
     </div>
+  );
+}
+
+/** Players rotated so "you" take seat 0 (+Z) — same convention as the 2D Table. */
+function Seats() {
+  const view = useCactusStore((s) => s.view);
+  const room = useCactusStore((s) => s.room);
+  if (!view || !room) return null;
+
+  const me = room.sessionId;
+  const myIndex = view.players.findIndex((p) => p.id === me);
+  const seated =
+    myIndex === -1 ? view.players : [...view.players.slice(myIndex), ...view.players.slice(0, myIndex)];
+
+  return (
+    <>
+      {seated.map((player, i) => (
+        <Seat3D
+          key={player.id}
+          player={player}
+          seatIndex={i}
+          seatCount={seated.length}
+          isMe={player.id === me}
+        />
+      ))}
+    </>
   );
 }
 
