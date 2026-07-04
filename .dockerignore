@@ -1,0 +1,10 @@
+node_modules
+client/node_modules
+public
+.git
+.vscode
+*.log
+Dockerfile
+fly.toml
+README.md
+cactus-prd.md

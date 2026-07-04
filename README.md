@@ -1,6 +1,6 @@
 # Cactus — Online Multiplayer Card Game
 
-Implementation of [cactus-prd.md](cactus-prd.md). Currently at **Phase 3: client UI, static pass** — a real React client (table layout, board rendering, draw/discard/swap/action-card targeting) sitting on top of the Phase 2 Colyseus server. Functional but plain — no animation yet (that's Phase 4/5).
+Implementation of [cactus-prd.md](cactus-prd.md). Currently at **Phase 6: lobby & sharing** — on top of the earlier phases this now has client-side reconnection (refresh or drop mid-game and reclaim your held seat within 5 minutes), framer-motion card flip/deal/discard animations with a match-window countdown bar, host-configurable rules (peek timer, stack-window duration) and kick in the lobby, plus a Dockerfile + fly.toml for deployment. Remaining: real-network playtest (Phase 7).
 
 ## Commands
 
@@ -26,6 +26,17 @@ npm run server              # single-process server, serving the last client:bui
 **To play during development:** run `npm run dev`, then open **http://localhost:5173** in two or more tabs. Create a game in one tab, join with the `CAC-XXXX` code in the others.
 
 **To play a single-process build:** `npm run client:build && npm run server`, then open **http://localhost:2567**.
+
+## Deployment
+
+The whole app (WebSocket server + static client) ships as one container; game state is in-memory, so run **exactly one instance** (PRD §6 — Colyseus needs a long-lived process, and a second instance would split the room-code namespace).
+
+```sh
+docker build -t cactusonline .        # multi-stage: builds the client, then a prod-only runtime
+docker run -p 2567:2567 cactusonline  # serves http + ws on :2567 (respects $PORT)
+```
+
+For [Fly.io](https://fly.io), [fly.toml](fly.toml) is ready: `fly launch` (accept the existing config), then `fly scale count 1`. The config pins one always-on machine and forces HTTPS — the client automatically connects over `wss://` when served from an `https://` page, so no client config is needed. Railway or any VPS that can run the Dockerfile works the same way.
 
 ## Layout
 
@@ -79,7 +90,7 @@ Older phase notes:
 1. ✅ Core engine, no networking
 2. ✅ Server wiring (Colyseus room, redacted state sync)
 3. ✅ Client UI, static pass
-4. ⬜ Real-time polish
-5. ⬜ Visual polish
-6. ⬜ Lobby & sharing
+4. ✅ Real-time polish (match-window countdown, reconnection flow, turn indicators)
+5. ✅ Visual polish (card faces, flip/deal/discard animations)
+6. ✅ Lobby & sharing (room codes, host rule config, kick)
 7. ⬜ Playtest pass
