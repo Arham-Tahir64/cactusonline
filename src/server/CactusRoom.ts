@@ -23,6 +23,14 @@ const ROOM_CODE_CHANNEL = 'cactus:roomcodes';
 const ROOM_CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
 const RECONNECT_GRACE_SECONDS = 300; // 5 minutes, per PRD §8
 
+// Host-configurable rule bounds (PRD §6 phase 6: lobby rule config).
+const PEEK_MS_MIN = 3_000;
+const PEEK_MS_MAX = 30_000;
+const MATCH_WINDOW_MS_MIN = 2_000;
+const MATCH_WINDOW_MS_MAX = 15_000;
+
+const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(n)));
+
 /**
  * Authoritative game room. The engine holds canonical state; every client
  * only ever receives their own redacted `PlayerView` (message type "view").
@@ -32,9 +40,11 @@ const RECONNECT_GRACE_SECONDS = 300; // 5 minutes, per PRD §8
  *   play-action | peek-own {slotId} | peek-opponent {target} | jack-swap {a,b}
  *   queen-look {target} | queen-swap {target} | call-cactus
  *   attempt-match {target} | give {slotId} | rematch
+ *   config {peekMs?, matchWindowMs?} | kick {sessionId}     (host, lobby only)
  *
  * Server → client messages:
- *   lobby {roomId, players, hostSessionId}
+ *   lobby {roomId, players, hostSessionId, settings}
+ *   kicked                             — sent to a player removed by the host
  *   view  (redacted PlayerView, sent individually after every mutation)
  *   revealed {target, card}            — private action-card look results
  *   event {type, ...}                  — public game events (stacks, cactus…)
@@ -127,6 +137,13 @@ export class CactusRoom extends Room {
       this.handle(client, () => this.game().giveCard(client.sessionId, msg.slotId)),
     );
     this.onMessage('rematch', (client) => this.handle(client, () => this.rematch(client)));
+
+    this.onMessage('config', (client, msg: { peekMs?: number; matchWindowMs?: number }) =>
+      this.handle(client, () => this.configure(client, msg)),
+    );
+    this.onMessage('kick', (client, msg: { sessionId: string }) =>
+      this.handle(client, () => this.kick(client, msg.sessionId)),
+    );
   }
 
   onJoin(client: Client, options: JoinOptions = {}) {
@@ -210,6 +227,40 @@ export class CactusRoom extends Room {
     }, this.peekMs);
   }
 
+  private configure(client: Client, msg: { peekMs?: number; matchWindowMs?: number }) {
+    if (client.sessionId !== this.hostSessionId) {
+      throw new GameError('not-host', 'Only the host can change the rules.');
+    }
+    if (this.engine) {
+      throw new GameError('already-started', 'Rules can only be changed in the lobby.');
+    }
+    if (typeof msg.peekMs === 'number' && Number.isFinite(msg.peekMs)) {
+      this.peekMs = clamp(msg.peekMs, PEEK_MS_MIN, PEEK_MS_MAX);
+    }
+    if (typeof msg.matchWindowMs === 'number' && Number.isFinite(msg.matchWindowMs)) {
+      this.matchWindowMs = clamp(msg.matchWindowMs, MATCH_WINDOW_MS_MIN, MATCH_WINDOW_MS_MAX);
+    }
+    this.broadcastLobby();
+  }
+
+  private kick(client: Client, sessionId: string) {
+    if (client.sessionId !== this.hostSessionId) {
+      throw new GameError('not-host', 'Only the host can kick players.');
+    }
+    if (this.engine) {
+      throw new GameError('already-started', 'Players can only be kicked in the lobby.');
+    }
+    if (sessionId === this.hostSessionId) {
+      throw new GameError('bad-target', 'The host cannot kick themselves.');
+    }
+    const target = this.clients.find((c) => c.sessionId === sessionId);
+    if (!target) throw new GameError('bad-target', 'That player is not in the lobby.');
+    // Tell the kicked client first (so it resets its UI instead of trying to
+    // reconnect), then close with a normal code; onLeave drops the seat.
+    target.send('kicked', {});
+    target.leave(1000);
+  }
+
   private rematch(client: Client) {
     if (client.sessionId !== this.hostSessionId) {
       throw new GameError('not-host', 'Only the host can start a rematch.');
@@ -267,6 +318,7 @@ export class CactusRoom extends Room {
       roomId: this.roomId,
       players: this.lobby.map((p) => ({ sessionId: p.sessionId, name: p.name })),
       hostSessionId: this.hostSessionId,
+      settings: { peekMs: this.peekMs, matchWindowMs: this.matchWindowMs },
     });
   }
 

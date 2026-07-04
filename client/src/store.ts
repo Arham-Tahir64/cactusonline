@@ -21,10 +21,16 @@ export interface LobbyPlayer {
   name: string;
 }
 
+export interface LobbySettings {
+  peekMs: number;
+  matchWindowMs: number;
+}
+
 export interface LobbyMessage {
   roomId: string;
   players: LobbyPlayer[];
   hostSessionId: string;
+  settings: LobbySettings;
 }
 
 export type GameEvent = { type: string } & Record<string, unknown>;
@@ -162,6 +168,25 @@ function wireRoom(
     set({
       known,
       events: [...get().events, { type: 'revealed', ...msg }],
+    });
+  });
+
+  room.onMessage('kicked', () => {
+    // The server closes our connection right after this with a normal code,
+    // so no auto-reconnect fires — just reset to the join screen.
+    clearSession();
+    set({
+      screen: 'join',
+      room: null,
+      lobby: null,
+      view: null,
+      events: [],
+      scores: null,
+      known: {},
+      clickMode: null,
+      jackFirst: null,
+      prompt: '',
+      lastError: 'You were removed from the lobby by the host.',
     });
   });
 

@@ -97,6 +97,66 @@ describe('lobby', () => {
   });
 });
 
+describe('lobby rule config & kick', () => {
+  it('host can adjust peek/match-window durations (clamped); non-hosts cannot', async () => {
+    const { alice, bob, aliceInbox, bobInbox } = await twoPlayerRoom();
+    await until(() => bobInbox.lobbies.length > 0, 'lobby broadcast');
+    expect(bobInbox.lobbies.at(-1).settings).toEqual({ peekMs: 80, matchWindowMs: 120 });
+
+    alice.send('config', { peekMs: 15_000, matchWindowMs: 8_000 });
+    await until(
+      () => bobInbox.lobbies.at(-1)?.settings?.peekMs === 15_000,
+      'config broadcast',
+    );
+    expect(bobInbox.lobbies.at(-1).settings).toEqual({ peekMs: 15_000, matchWindowMs: 8_000 });
+
+    // Out-of-range values are clamped, not rejected.
+    alice.send('config', { peekMs: 999_999, matchWindowMs: 1 });
+    await until(() => bobInbox.lobbies.at(-1)?.settings?.peekMs === 30_000, 'clamped config');
+    expect(bobInbox.lobbies.at(-1).settings.matchWindowMs).toBe(2_000);
+
+    bob.send('config', { peekMs: 5_000 });
+    await until(() => bobInbox.errors.length > 0, 'not-host error');
+    expect(bobInbox.errors.at(-1).code).toBe('not-host');
+    expect(bobInbox.lobbies.at(-1).settings.peekMs).toBe(30_000);
+    void aliceInbox;
+  });
+
+  it('host can kick a lobby player; the kicked client is told and the seat is dropped', async () => {
+    const { alice, bob, aliceInbox, bobInbox } = await twoPlayerRoom();
+
+    let kicked = false;
+    bob.onMessage('kicked', () => {
+      kicked = true;
+    });
+
+    alice.send('kick', { sessionId: bob.sessionId });
+    await until(() => kicked, 'kicked message');
+    // The kick drops the seat and rebroadcasts the lobby to remaining players.
+    await until(
+      () => aliceInbox.lobbies.at(-1)?.players.length === 1,
+      'lobby without bob',
+    );
+    expect(aliceInbox.lobbies.at(-1).players.map((p: any) => p.name)).toEqual(['Alice']);
+    void bobInbox;
+  });
+
+  it('non-hosts cannot kick, and nobody can kick once the game started', async () => {
+    const { alice, bob, aliceInbox, bobInbox } = await twoPlayerRoom();
+    await until(() => bobInbox.lobbies.length > 0, 'lobby broadcast');
+
+    bob.send('kick', { sessionId: alice.sessionId });
+    await until(() => bobInbox.errors.length > 0, 'not-host error');
+    expect(bobInbox.errors.at(-1).code).toBe('not-host');
+
+    alice.send('start');
+    await until(() => aliceInbox.views.length > 0, 'game started');
+    alice.send('kick', { sessionId: bob.sessionId });
+    await until(() => aliceInbox.errors.length > 0, 'already-started error');
+    expect(aliceInbox.errors.at(-1).code).toBe('already-started');
+  });
+});
+
 describe('game start & redaction', () => {
   it('deals into peek phase; clients see their own peek cards and zero face-down faces', async () => {
     const { alice, aliceInbox, bobInbox } = await twoPlayerRoom();
