@@ -201,6 +201,26 @@ button:focus-visible {
   color: var(--red);
 }
 
+/* ---------- 3D table ---------- */
+
+.table-3d-wrap {
+  height: 56vh;
+  min-height: 320px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.table-3d-wrap canvas {
+  touch-action: none; /* taps go to the scene, not page scroll */
+}
+
+.mode-toggle-btn {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 /* ---------- Game screen ---------- */
 
 .game-screen {

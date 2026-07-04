@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useCactusStore } from '../store';
 import { nameOf } from '../names';
 import Table from './Table';
+import TableScene from '../three/TableScene';
 import ActionBar from './ActionBar';
 import Scoreboard from './Scoreboard';
 import EventLog from './EventLog';
@@ -13,6 +14,8 @@ export default function GameScreen() {
   const setClickMode = useCactusStore((s) => s.setClickMode);
   const scores = useCactusStore((s) => s.scores);
   const leave = useCactusStore((s) => s.leave);
+  const tableMode = useCactusStore((s) => s.tableMode);
+  const setTableMode = useCactusStore((s) => s.setTableMode);
 
   // Mandatory action-card / give sequences drive the click mode automatically —
   // the player never has to remember which follow-up step they're on.
@@ -46,6 +49,13 @@ export default function GameScreen() {
           {myTurn ? 'your turn' : `${nameOf(view, view.currentPlayerId)}'s turn`}
           {view.cactusCallerId && <> · 🌵 called by {nameOf(view, view.cactusCallerId)}</>}
         </span>
+        <button
+          className="mode-toggle-btn"
+          title="Switch between the 3D and 2D table"
+          onClick={() => setTableMode(tableMode === '3d' ? '2d' : '3d')}
+        >
+          {tableMode === '3d' ? '2D' : '3D'}
+        </button>
         <button className="leave-btn" onClick={leave}>
           Leave
         </button>
@@ -55,7 +65,7 @@ export default function GameScreen() {
         <div className="peek-banner">👀 Peek phase — memorize your bottom two cards before it ends.</div>
       )}
 
-      <Table />
+      {tableMode === '3d' ? <TableScene /> : <Table />}
       <ActionBar myTurn={myTurn} />
       {scores && <Scoreboard />}
       <EventLog />

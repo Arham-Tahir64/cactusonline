@@ -55,6 +55,8 @@ interface CactusState {
   /** True while automatically re-establishing a dropped connection. */
   reconnecting: boolean;
   lastError: string | null;
+  /** 3D table by default; 2D DOM table kept as a fallback for weak devices. */
+  tableMode: '3d' | '2d';
 
   createGame(name: string): Promise<void>;
   joinGame(code: string, name: string): Promise<void>;
@@ -63,6 +65,7 @@ interface CactusState {
   send(type: string, payload?: unknown): void;
   setClickMode(mode: ClickMode, prompt?: string): void;
   handleSlotClick(playerId: string, slotId: string): void;
+  setTableMode(mode: '3d' | '2d'): void;
 }
 
 /** How long an action-card look stays face-up before flipping back (PRD §7:
@@ -76,6 +79,15 @@ export const REVEAL_MS = 5_000;
 
 const SESSION_KEY = 'cactus-session';
 const NAME_KEY = 'cactus-name';
+const TABLE_MODE_KEY = 'cactus-table-mode';
+
+function savedTableMode(): '3d' | '2d' {
+  try {
+    return localStorage.getItem(TABLE_MODE_KEY) === '2d' ? '2d' : '3d';
+  } catch {
+    return '3d';
+  }
+}
 
 interface SavedSession {
   token: string;
@@ -250,6 +262,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
   connecting: false,
   reconnecting: false,
   lastError: null,
+  tableMode: savedTableMode(),
 
   async createGame(name) {
     set({ connecting: true, lastError: null });
@@ -316,6 +329,15 @@ export const useCactusStore = create<CactusState>((set, get) => ({
 
   setClickMode(mode, prompt = '') {
     set({ clickMode: mode, prompt, jackFirst: mode === 'jack-1' ? null : get().jackFirst });
+  },
+
+  setTableMode(mode) {
+    try {
+      localStorage.setItem(TABLE_MODE_KEY, mode);
+    } catch {
+      /* ignore */
+    }
+    set({ tableMode: mode });
   },
 
   handleSlotClick(playerId, slotId) {
