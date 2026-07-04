@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import type { Card } from '@engine/types';
 import { isRed } from '../cardLabel';
 
@@ -11,38 +12,51 @@ interface Props {
   className?: string;
 }
 
+/**
+ * Two-faced card with a 3D flip: transitions between face-up and face-down
+ * animate a rotateY turn instead of swapping content instantly.
+ */
 export default function PlayingCard({ card, faceDown, size = 'md', className = '' }: Props) {
   const showBack = faceDown || !card;
-  const classes = [
-    'playing-card',
-    `size-${size}`,
-    showBack ? 'face-down' : isRed(card) ? 'red' : 'black',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  if (showBack) {
-    return (
-      <div className={classes}>
-        <div className="card-back-pattern" />
-      </div>
-    );
-  }
-
-  const symbol = SUIT_SYMBOLS[card.suit] ?? card.suit;
+  const symbol = card ? (SUIT_SYMBOLS[card.suit] ?? card.suit) : '';
 
   return (
-    <div className={classes}>
-      <span className="corner corner-tl">
-        <span className="corner-rank">{card.rank}</span>
-        <span className="corner-suit">{symbol}</span>
-      </span>
-      <span className="center-suit">{symbol}</span>
-      <span className="corner corner-br">
-        <span className="corner-rank">{card.rank}</span>
-        <span className="corner-suit">{symbol}</span>
-      </span>
+    <div className={['card-flip', `size-${size}`, className].filter(Boolean).join(' ')}>
+      <motion.div
+        className="card-flip-inner"
+        initial={false}
+        animate={{ rotateY: showBack ? 180 : 0 }}
+        transition={{ duration: 0.35, ease: 'easeInOut' }}
+      >
+        <div
+          className={[
+            'playing-card',
+            'card-face',
+            'front',
+            `size-${size}`,
+            card ? (isRed(card) ? 'red' : 'black') : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {card && (
+            <>
+              <span className="corner corner-tl">
+                <span className="corner-rank">{card.rank}</span>
+                <span className="corner-suit">{symbol}</span>
+              </span>
+              <span className="center-suit">{symbol}</span>
+              <span className="corner corner-br">
+                <span className="corner-rank">{card.rank}</span>
+                <span className="corner-suit">{symbol}</span>
+              </span>
+            </>
+          )}
+        </div>
+        <div className={`playing-card card-face back face-down size-${size}`}>
+          <div className="card-back-pattern" />
+        </div>
+      </motion.div>
     </div>
   );
 }

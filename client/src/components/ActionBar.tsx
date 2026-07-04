@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useCactusStore } from '../store';
 import { FORCED_MODES } from '../targeting';
 import PlayingCard from './PlayingCard';
@@ -61,7 +62,12 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
       )}
 
       {holding && view.drawnCard && (
-        <div className="drawn-panel">
+        <motion.div
+          className="drawn-panel"
+          initial={{ y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+        >
           <div className="drawn-card-display">
             <PlayingCard card={view.drawnCard} size="md" />
             <span className="drawn-card-caption">drawn</span>
@@ -75,7 +81,7 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
           <button disabled={!ACTION_RANKS.has(view.drawnCard.rank)} onClick={() => send('play-action')}>
             Play action
           </button>
-        </div>
+        </motion.div>
       )}
 
       {clickMode && !FORCED_MODES.has(clickMode) && (

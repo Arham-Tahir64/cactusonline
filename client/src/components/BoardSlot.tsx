@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import type { RedactedSlot } from '@engine/types';
 import { useCactusStore } from '../store';
 import { isValidTarget } from '../targeting';
@@ -28,8 +29,13 @@ export default function BoardSlot({ playerId, slot }: Props) {
   const isRemembered = !visibleCard && !!remembered;
 
   return (
-    <button
+    <motion.button
       type="button"
+      layout
+      initial={{ scale: 0.5, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.5, opacity: 0, y: -10 }}
+      transition={{ type: 'spring', stiffness: 500, damping: 32 }}
       className={['board-slot', valid ? 'selectable' : '', isChosenFirst ? 'chosen' : '']
         .filter(Boolean)
         .join(' ')}
@@ -43,6 +49,6 @@ export default function BoardSlot({ playerId, slot }: Props) {
         size="sm"
         className={isRemembered ? 'remembered' : ''}
       />
-    </button>
+    </motion.button>
   );
 }

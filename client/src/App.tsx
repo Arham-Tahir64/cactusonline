@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { useCactusStore } from './store';
 import JoinScreen from './components/JoinScreen';
 import LobbyScreen from './components/LobbyScreen';
@@ -15,19 +16,21 @@ export default function App() {
   }, [resumeSession]);
 
   return (
-    <div className="app">
-      <h1 className="app-title">🌵 Cactus</h1>
-      {reconnecting && (
-        <div className="reconnect-overlay">
-          <div className="reconnect-box">
-            <span className="reconnect-spinner" />
-            Reconnecting to your game…
+    <MotionConfig reducedMotion="user">
+      <div className="app">
+        <h1 className="app-title">🌵 Cactus</h1>
+        {reconnecting && (
+          <div className="reconnect-overlay">
+            <div className="reconnect-box">
+              <span className="reconnect-spinner" />
+              Reconnecting to your game…
+            </div>
           </div>
-        </div>
-      )}
-      {screen === 'join' && <JoinScreen />}
-      {screen === 'lobby' && <LobbyScreen />}
-      {screen === 'game' && <GameScreen />}
-    </div>
+        )}
+        {screen === 'join' && <JoinScreen />}
+        {screen === 'lobby' && <LobbyScreen />}
+        {screen === 'game' && <GameScreen />}
+      </div>
+    </MotionConfig>
   );
 }

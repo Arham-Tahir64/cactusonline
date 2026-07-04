@@ -377,7 +377,7 @@ button:focus-visible {
   color: #161616;
 }
 
-.playing-card.remembered {
+.remembered .playing-card.front {
   opacity: 0.82;
   border-style: dashed;
   border-color: #888;
@@ -402,6 +402,45 @@ button:focus-visible {
   box-shadow:
     inset 0 0 0 2px #b21f2d,
     0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Flip structure: a perspective wrapper sized like the card, an inner 3D
+   pivot, and two absolutely-stacked faces with hidden backfaces. */
+
+.card-flip {
+  aspect-ratio: 5 / 7;
+  perspective: 600px;
+}
+
+.card-flip.size-sm {
+  width: 2.5rem;
+}
+
+.card-flip.size-md {
+  width: 3.4rem;
+}
+
+.card-flip.size-lg {
+  width: 4.6rem;
+}
+
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.card-face.back {
+  transform: rotateY(180deg);
 }
 
 .corner {
@@ -494,6 +533,32 @@ button:focus-visible {
   white-space: nowrap;
   margin-top: 0.25rem;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.match-countdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: #e0952a;
+  transform-origin: left;
+}
+
+/* The incoming discard card animates on top of the previous one so the pile
+   never appears to empty out between cards. */
+.discard-stack {
+  position: relative;
+  width: 3.4rem; /* matches .card-flip.size-md */
+  aspect-ratio: 5 / 7;
+}
+
+.discard-under,
+.discard-top {
+  position: absolute;
+  inset: 0;
 }
 
 /* ---------- Action bar ---------- */

@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion';
 import type { RedactedPlayer } from '@engine/types';
 import { useCactusStore } from '../store';
 import BoardSlot from './BoardSlot';
@@ -19,9 +20,11 @@ export default function PlayerBoard({ player, isMe }: Props) {
         {player.hasCalledCactus && ' 🌵'}
       </div>
       <div className="board-grid">
-        {player.board.map((slot) => (
-          <BoardSlot key={slot.slotId} playerId={player.id} slot={slot} />
-        ))}
+        <AnimatePresence initial={false}>
+          {player.board.map((slot) => (
+            <BoardSlot key={slot.slotId} playerId={player.id} slot={slot} />
+          ))}
+        </AnimatePresence>
         {player.board.length === 0 && <span className="empty-board">(empty)</span>}
       </div>
     </div>
