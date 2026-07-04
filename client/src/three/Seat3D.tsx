@@ -67,7 +67,13 @@ export default function Seat3D({ player, seatIndex, seatCount, isMe }: Props) {
           lifted={!!drawnCard}
         />
       )}
-      <Html position={tagPos} center distanceFactor={11} zIndexRange={[10, 0]}>
+      <Html
+        position={tagPos}
+        center
+        distanceFactor={11}
+        zIndexRange={[10, 0]}
+        style={{ pointerEvents: 'none' }}
+      >
         <div className={`seat-tag ${isCurrent ? 'current' : ''} ${isMe ? 'me' : ''}`}>
           {player.name}
           {isMe && ' (you)'}

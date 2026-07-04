@@ -211,6 +211,26 @@ button:focus-visible {
   border: 1px solid var(--line);
 }
 
+.table-3d-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #141b16;
+  color: #cfc9bd;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .table-3d-wrap {
+    height: 46vh;
+    min-height: 260px;
+  }
+
+  .seat-tag {
+    font-size: 0.8rem;
+  }
+}
+
 .table-3d-wrap canvas {
   touch-action: none; /* taps go to the scene, not page scroll */
 }

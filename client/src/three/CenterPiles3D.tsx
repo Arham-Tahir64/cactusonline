@@ -32,6 +32,7 @@ export default function CenterPiles3D() {
         center
         distanceFactor={7}
         zIndexRange={[10, 0]}
+        style={{ pointerEvents: 'none' }}
       >
         <div className="pile-tag">deck ({view.drawPileCount})</div>
       </Html>
@@ -53,6 +54,7 @@ export default function CenterPiles3D() {
         center
         distanceFactor={7}
         zIndexRange={[10, 0]}
+        style={{ pointerEvents: 'none' }}
       >
         <div className="pile-tag">discard</div>
       </Html>

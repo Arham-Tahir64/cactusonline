@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useCactusStore } from '../store';
 import { nameOf } from '../names';
 import Table from './Table';
-import TableScene from '../three/TableScene';
+
+// three.js is ~150KB gzip — load it only when the 3D table actually renders.
+const TableScene = lazy(() => import('../three/TableScene'));
 import ActionBar from './ActionBar';
 import Scoreboard from './Scoreboard';
 import EventLog from './EventLog';
@@ -65,7 +67,13 @@ export default function GameScreen() {
         <div className="peek-banner">👀 Peek phase — memorize your bottom two cards before it ends.</div>
       )}
 
-      {tableMode === '3d' ? <TableScene /> : <Table />}
+      {tableMode === '3d' ? (
+        <Suspense fallback={<div className="table-3d-wrap table-3d-loading">Setting the table…</div>}>
+          <TableScene />
+        </Suspense>
+      ) : (
+        <Table />
+      )}
       <ActionBar myTurn={myTurn} />
       {scores && <Scoreboard />}
       <EventLog />

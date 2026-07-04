@@ -1,6 +1,6 @@
 # Cactus — Online Multiplayer Card Game
 
-Implementation of [cactus-prd.md](cactus-prd.md). Currently at **Phase 6: lobby & sharing** — on top of the earlier phases this now has client-side reconnection (refresh or drop mid-game and reclaim your held seat within 5 minutes), framer-motion card flip/deal/discard animations with a match-window countdown bar, host-configurable rules (peek timer, stack-window duration) and kick in the lobby, plus a Dockerfile + fly.toml for deployment. Remaining: real-network playtest (Phase 7).
+Implementation of [cactus-prd.md](cactus-prd.md). All PRD phases are built, plus a **3D table** (react-three-fiber) as the default view: felt table with per-seat camera, procedural card textures, spring-animated deals/flips/reveals, a countdown ring on the stack window, and raycast picking with the same targeting rules as the 2D table — which is kept behind the in-game 2D/3D toggle as a fallback for weak devices. Also: client-side reconnection (reclaim your held seat within 5 minutes), host-configurable rules and kick in the lobby, and a Dockerfile + fly.toml for deployment. Remaining: real-network playtest (Phase 7).
 
 ## Commands
 
@@ -49,6 +49,12 @@ For [Fly.io](https://fly.io), [fly.toml](fly.toml) is ready: `fly launch` (accep
   - `src/components/ActionBar.tsx` — turn actions (draw/take-discard/cactus/stack) and the drawn-card panel (swap/discard/play-action).
   - `src/components/GameScreen.tsx` — drives the mandatory action-card and give-a-card sequences automatically via the server's `pendingAction`/`pendingGive` state, so the player is always told what to click next.
   - Imports engine types directly from `../src/engine` via a `@engine` alias (Vite `resolve.alias` + `tsconfig` `paths`) — the client's type of a `Card` or `PlayerView` can never drift from the server's.
+  - `src/three/` — the 3D table (react-three-fiber + drei + react-spring), default view with the 2D table behind a toggle:
+    - `layout.ts` — pure pose math: every card's target position is a function of the current `PlayerView` (seats on an ellipse with "you" at the bottom, 2×N boards anchored at the player edge growing toward the center, pile positions, world↔seat-local transforms). No event choreography — springs animate toward wherever the latest view says a card belongs, so swaps/reflows/reveals animate for free.
+    - `textures.ts` — the 52 faces + back drawn to canvas at runtime (no image assets), cached per session.
+    - `Card3D.tsx` — spring-driven pose (position/flip/lift/tilt), flips arc upward mid-turn so cards never clip the felt, oversized invisible hit plane for touch raycasting.
+    - `Seat3D.tsx` / `CenterPiles3D.tsx` — boards with the same visibility+targeting rules as the 2D components, turn glow, floating drawn-card indicator, deck stack, discard drop-in, and a shrinking countdown ring during the stack window.
+    - The scene chunk is lazy-loaded (~255KB gzip) so the join/lobby screens and 2D-mode users don't pay for three.js.
 
 ## Client design notes (Phase 3)
 
@@ -91,6 +97,6 @@ Older phase notes:
 2. ✅ Server wiring (Colyseus room, redacted state sync)
 3. ✅ Client UI, static pass
 4. ✅ Real-time polish (match-window countdown, reconnection flow, turn indicators)
-5. ✅ Visual polish (card faces, flip/deal/discard animations)
+5. ✅ Visual polish (card faces, flip/deal/discard animations, 3D table)
 6. ✅ Lobby & sharing (room codes, host rule config, kick)
 7. ⬜ Playtest pass
