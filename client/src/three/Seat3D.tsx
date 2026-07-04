@@ -23,6 +23,12 @@ interface Props {
 
 export default function Seat3D({ player, seatIndex, seatCount, isMe }: Props) {
   const isCurrent = useCactusStore((s) => s.view?.currentPlayerId === player.id);
+  const holding = useCactusStore(
+    (s) =>
+      s.view?.currentPlayerId === player.id && s.view.turnStage === 'holding-drawn-card',
+  );
+  const drawnCard = useCactusStore((s) => (isMe ? s.view?.drawnCard ?? null : null));
+  const revealPhase = useCactusStore((s) => s.view?.phase === 'reveal');
   const t = seatTransform(seatIndex, seatCount);
 
   // Opponents' tags sit behind their (anchored) bottom row; yours sits beside
@@ -33,6 +39,12 @@ export default function Seat3D({ player, seatIndex, seatCount, isMe }: Props) {
 
   return (
     <group position={t.position} rotation={[0, t.rotationY, 0]}>
+      {isCurrent && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>
+          <circleGeometry args={[1.7, 40]} />
+          <meshBasicMaterial color="#7dc37b" transparent opacity={0.14} />
+        </mesh>
+      )}
       {player.board.map((slot, i) => (
         <BoardCard3D
           key={slot.slotId}
@@ -41,8 +53,20 @@ export default function Seat3D({ player, seatIndex, seatCount, isMe }: Props) {
           index={i}
           count={player.board.length}
           enterFrom={worldToSeatLocal(DECK_POS, t)}
+          // Final reveal sweeps across each board card-by-card.
+          flipDelayMs={revealPhase ? i * 120 : 0}
         />
       ))}
+      {holding && (
+        // The current player is privately looking at a drawn card: everyone
+        // sees a card hovering at their seat (face only for the holder).
+        <Card3D
+          card={drawnCard}
+          faceDown={!drawnCard}
+          position={[0, 0.95, BOTTOM_ROW_Z - CARD_H / 2]}
+          lifted={!!drawnCard}
+        />
+      )}
       <Html position={tagPos} center distanceFactor={11} zIndexRange={[10, 0]}>
         <div className={`seat-tag ${isCurrent ? 'current' : ''} ${isMe ? 'me' : ''}`}>
           {player.name}
@@ -62,12 +86,14 @@ function BoardCard3D({
   index,
   count,
   enterFrom,
+  flipDelayMs = 0,
 }: {
   playerId: string;
   slot: RedactedSlot;
   index: number;
   count: number;
   enterFrom: Vec3;
+  flipDelayMs?: number;
 }) {
   // Private reveals are transient: peek phase (straight off the view) and
   // timed action-card looks. Otherwise only server-confirmed face-up cards.
@@ -95,6 +121,7 @@ function BoardCard3D({
       position={slotLocalPosition(index, count)}
       enterFrom={enterFrom}
       lifted={privateReveal}
+      delayMs={flipDelayMs}
       selectable={valid}
       chosen={isChosenFirst}
       onClick={() => handleSlotClick(playerId, slot.slotId)}

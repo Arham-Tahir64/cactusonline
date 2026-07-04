@@ -17,6 +17,8 @@ interface Props {
   enterFrom?: Vec3;
   /** Hold the card raised (private reveal); tilts toward the camera too. */
   lifted?: boolean;
+  /** Delay pose updates (drives the staggered final-reveal sweep). */
+  delayMs?: number;
   /** Clicking this card would currently do something (drives glow + cursor). */
   selectable?: boolean;
   /** First card of a pending two-card action (jack swap). */
@@ -47,6 +49,7 @@ export default function Card3D({
   rotationY = 0,
   enterFrom,
   lifted = false,
+  delayMs = 0,
   selectable = false,
   chosen = false,
   onClick,
@@ -67,6 +70,7 @@ export default function Card3D({
     from: enterFrom
       ? { px: enterFrom[0], py: enterFrom[1] + 0.25, pz: enterFrom[2], flip: Math.PI, lift: 0, tilt: 0 }
       : undefined,
+    delay: delayMs,
     config: { tension: 150, friction: 22 },
   });
 
