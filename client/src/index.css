@@ -1558,11 +1558,49 @@ button:focus-visible {
   }
 
   .table-circle .opponent-seat[data-seat-zone='north'] {
-    top: 22% !important;
+    top: 12% !important;
+  }
+
+  .table-circle .opponent-seat[data-seat-zone='north'] .seat-avatar {
+    top: -5px;
+  }
+
+  .table-circle .opponent-seat[data-seat-zone='west'],
+  .table-circle .opponent-seat[data-seat-zone='east'] {
+    top: 30% !important;
+  }
+
+  .table-circle .opponent-seat[data-seat-zone='west'] .seat-avatar,
+  .table-circle .opponent-seat[data-seat-zone='east'] .seat-avatar {
+    top: 88px;
   }
 
   .table-circle[data-player-count='2'] .opponent-seat[data-seat-zone='north'] {
     top: 9% !important;
+  }
+
+  .table-circle[data-player-count='4'] .opponent-seat[data-seat-zone='north'] {
+    top: 8% !important;
+  }
+
+  .table-circle[data-player-count='4'] .opponent-seat[data-seat-zone='north'] .player-board {
+    --seat-scale: 0.78;
+  }
+
+  .table-circle[data-player-count='4'] .opponent-seat[data-seat-zone='north'] .seat-avatar {
+    top: -70px;
+    left: -40%;
+    width: 190px;
+    height: 190px;
+  }
+
+  .turn-guide {
+    bottom: 18px;
+    min-height: 270px;
+  }
+
+  .turn-guide .guide-step {
+    padding-block: 7px;
   }
 }
 
