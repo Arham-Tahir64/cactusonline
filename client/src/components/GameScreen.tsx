@@ -5,6 +5,7 @@ import Table from './Table';
 import ActionBar from './ActionBar';
 import Scoreboard from './Scoreboard';
 import EventLog from './EventLog';
+import GameHeader from './GameHeader';
 
 export default function GameScreen() {
   const view = useCactusStore((s) => s.view);
@@ -12,7 +13,6 @@ export default function GameScreen() {
   const clickMode = useCactusStore((s) => s.clickMode);
   const setClickMode = useCactusStore((s) => s.setClickMode);
   const scores = useCactusStore((s) => s.scores);
-  const leave = useCactusStore((s) => s.leave);
 
   // Mandatory action-card / give sequences drive the click mode automatically —
   // the player never has to remember which follow-up step they're on.
@@ -40,15 +40,11 @@ export default function GameScreen() {
 
   return (
     <section className="game-screen">
-      <div className="game-header">
-        <span className="room-code">{room.roomId}</span>
-        <span className="phase-banner">
-          {myTurn ? 'your turn' : `${nameOf(view, view.currentPlayerId)}'s turn`}
-          {view.cactusCallerId && <> · 🌵 called by {nameOf(view, view.cactusCallerId)}</>}
-        </span>
-        <button className="leave-btn" onClick={leave}>
-          Leave
-        </button>
+      <GameHeader />
+
+      <div className="turn-banner">
+        <strong>{myTurn ? 'Your turn' : `${nameOf(view, view.currentPlayerId)}'s turn`}</strong>
+        {view.cactusCallerId && <span>🌵 called by {nameOf(view, view.cactusCallerId)}</span>}
       </div>
 
       {view.phase === 'peek' && (

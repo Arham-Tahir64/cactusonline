@@ -348,26 +348,218 @@ button:focus-visible {
 /* ---------- Game screen ---------- */
 
 .game-screen {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 700px;
+  overflow: hidden;
 }
 
-.game-header {
+.game-hud {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 30;
+  height: 94px;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.6rem 0.8rem;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-size: 0.85rem;
+  padding: 12px 22px 8px;
+  background: linear-gradient(rgba(8, 7, 6, 0.8), rgba(8, 7, 6, 0));
+  -webkit-app-region: drag;
 }
 
-.phase-banner {
-  font-weight: 600;
+.game-hud button {
+  -webkit-app-region: no-drag;
+}
+
+.hud-left,
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+}
+
+.hud-right {
+  justify-content: flex-end;
+}
+
+.hud-icon,
+.player-count {
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
+  padding: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.45rem;
+  background: radial-gradient(circle at 42% 28%, rgba(55, 48, 38, 0.96), rgba(12, 11, 9, 0.96));
+  border: 1px solid rgba(239, 207, 160, 0.4);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.45), inset 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.menu-button {
+  border-radius: 14px;
+}
+
+.player-count {
+  width: auto;
+  grid-auto-flow: column;
+  gap: 7px;
+  padding: 0 14px;
+  font-size: 1rem;
+}
+
+.game-brand {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.75));
+}
+
+.game-brand > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.game-brand strong {
+  font: italic 800 2.45rem/1 Georgia, serif;
+  color: #f7d9a4;
+  letter-spacing: -0.06em;
+  text-shadow: 0 2px #59341c;
+}
+
+.hud-room-code {
+  min-height: 27px;
+  padding: 3px 14px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: rgba(9, 8, 7, 0.82);
+  font: 800 0.76rem/1 ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  color: #ead0a2;
+}
+
+.hud-room-code span {
+  margin-left: 8px;
+}
+
+.turn-banner {
+  position: absolute;
+  z-index: 20;
+  top: 112px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.turn-banner strong {
+  padding: 8px 24px;
+  border-radius: 999px;
+  color: #ffd34e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(#563a15, #261609);
+  border: 1px solid #bf741d;
+  box-shadow: 0 0 20px rgba(228, 139, 31, 0.32), inset 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.turn-banner span {
+  color: #f1d1a0;
+  font-size: 0.72rem;
+}
+
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(3, 3, 2, 0.74);
+  backdrop-filter: blur(8px);
+}
+
+.utility-modal {
+  position: relative;
+  width: min(92vw, 520px);
+  padding: 2rem;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #29231c, #0f0e0c 70%);
+  border: 1px solid rgba(244, 206, 145, 0.42);
+  box-shadow: 0 28px 80px #000, inset 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.utility-modal h2 {
+  margin: 0 0 1.2rem;
+  text-align: center;
+  color: #ffe2aa;
+  font: 800 2rem Georgia, serif;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 1.4rem;
+}
+
+.rules-list {
+  margin: 0;
+  padding-left: 1.3rem;
+  color: #d6c8b1;
+}
+
+.rules-list li {
+  margin: 0.8rem 0;
+  padding-left: 0.35rem;
+  line-height: 1.45;
+}
+
+.rules-list strong,
+.rules-note {
+  color: var(--gold);
+}
+
+.rules-note {
+  margin: 1.2rem 0 0;
+  text-align: center;
+  font-weight: 700;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.setting-row input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  accent-color: #73b830;
+}
+
+.setting-row input[type='range'] {
+  width: 190px;
+  padding: 0;
+  accent-color: #73b830;
 }
 
 .peek-banner {
