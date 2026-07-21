@@ -259,6 +259,13 @@
         "com.unity.modules.physics": "1.0.0"
       }
     },
+    "io.colyseus.sdk": {
+      "version": "https://github.com/colyseus/colyseus-unity-sdk.git?path=Assets/Colyseus#0.16.6",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "1c2c547ae7e1b12b103859010dbab24f136fe11f"
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,
