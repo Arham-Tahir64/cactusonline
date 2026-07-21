@@ -1,0 +1,24 @@
+{
+  "name": "cactus-desktop",
+  "productName": "Cactus",
+  "version": "0.1.0",
+  "description": "Cactus online multiplayer card game",
+  "author": "Cactus Team",
+  "main": "dist/main.js",
+  "private": true,
+  "scripts": {
+    "build:main": "tsc -p tsconfig.json",
+    "build:renderer": "node scripts/build-renderer.cjs",
+    "dev": "wait-on tcp:5173 tcp:2567 && npm run build:main && electron .",
+    "make": "npm run build:renderer && npm run build:main && electron-forge make --platform=win32 --arch=x64"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.8.1",
+    "@electron-forge/maker-squirrel": "^7.8.1",
+    "@electron-forge/maker-zip": "^7.8.1",
+    "@types/node": "^22.10.0",
+    "electron": "^37.2.3",
+    "typescript": "^5.7.0",
+    "wait-on": "^8.0.3"
+  }
+}
