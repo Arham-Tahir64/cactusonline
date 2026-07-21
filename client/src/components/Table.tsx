@@ -29,7 +29,7 @@ export default function Table() {
       {seated.map((player, i) => {
         const angle = Math.PI / 2 + (2 * Math.PI * i) / n;
         const left = 50 + 43 * Math.cos(angle);
-        const top = 50 + 42 * Math.sin(angle);
+        const top = 50 + 36 * Math.sin(angle);
         return (
           <div
             key={player.id}
