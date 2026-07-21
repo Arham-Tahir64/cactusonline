@@ -25,7 +25,9 @@ export default function PlayingCard({ card, faceDown, size = 'md', className = '
   if (showBack) {
     return (
       <div className={classes}>
-        <div className="card-back-pattern" />
+        <div className="card-back-pattern">
+          <span className="card-back-emblem" aria-hidden="true">🌵</span>
+        </div>
       </div>
     );
   }

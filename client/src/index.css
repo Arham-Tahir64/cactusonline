@@ -821,16 +821,22 @@ button:focus-visible {
   padding: 0.3rem 0;
 }
 
-/* ---------- Playing cards (real card look: white face, corner indices,
-   center suit symbol, red-lattice back) ---------- */
+/* ---------- Playing cards ---------- */
 
 .playing-card {
   position: relative;
   aspect-ratio: 5 / 7;
-  border-radius: 8%;
-  background: #fff;
-  border: 1px solid #c7c7c7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  border-radius: 9%;
+  background:
+    radial-gradient(circle at 72% 24%, rgba(178, 124, 63, 0.12), transparent 18%),
+    radial-gradient(circle at 18% 82%, rgba(145, 91, 40, 0.1), transparent 22%),
+    linear-gradient(145deg, #f8e7c8, #e7c99f 74%, #d6b486);
+  border: 2px solid #b98958;
+  box-shadow:
+    0 4px 7px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 1px rgba(255, 248, 222, 0.65),
+    inset 0 -5px 8px rgba(114, 65, 28, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -839,23 +845,23 @@ button:focus-visible {
 }
 
 .playing-card.size-sm {
-  width: 2.5rem;
+  width: clamp(2.75rem, 3.55vw, 3.7rem);
 }
 
 .playing-card.size-md {
-  width: 3.4rem;
+  width: clamp(3.45rem, 4.4vw, 4.8rem);
 }
 
 .playing-card.size-lg {
-  width: 4.6rem;
+  width: clamp(4.5rem, 5.8vw, 6.2rem);
 }
 
 .playing-card.red {
-  color: var(--red);
+  color: #b72d27;
 }
 
 .playing-card.black {
-  color: #161616;
+  color: #24221f;
 }
 
 .playing-card.remembered {
@@ -865,24 +871,42 @@ button:focus-visible {
 }
 
 .playing-card.face-down {
-  border: none;
-  background: transparent;
-  box-shadow: none;
+  border-color: #ba9365;
+  background: #263b27;
 }
 
 .card-back-pattern {
+  position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 8%;
+  display: grid;
+  place-items: center;
+  border-radius: 7%;
   box-sizing: border-box;
-  background-color: #b21f2d;
+  background-color: #2c452d;
   background-image:
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.16) 0 2px, transparent 2px 7px),
-    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.16) 0 2px, transparent 2px 7px);
-  border: 3px solid #fff;
+    radial-gradient(circle at center, rgba(206, 187, 111, 0.13), transparent 48%),
+    repeating-linear-gradient(45deg, rgba(221, 203, 139, 0.06) 0 1px, transparent 1px 8px),
+    repeating-linear-gradient(-45deg, rgba(221, 203, 139, 0.05) 0 1px, transparent 1px 8px);
+  border: 3px solid #d0ae7d;
   box-shadow:
-    inset 0 0 0 2px #b21f2d,
-    0 1px 3px rgba(0, 0, 0, 0.3);
+    inset 0 0 0 2px #233823,
+    inset 0 0 0 4px rgba(211, 177, 119, 0.5),
+    inset 0 0 16px rgba(0, 0, 0, 0.45);
+}
+
+.card-back-emblem {
+  display: grid;
+  place-items: center;
+  width: 58%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(218, 190, 124, 0.3);
+  border-radius: 50%;
+  background: rgba(12, 27, 15, 0.3);
+  color: #bdaf6a;
+  font-size: clamp(0.8rem, 1.75vw, 1.45rem);
+  filter: sepia(0.65) saturate(0.75);
+  text-shadow: 0 2px 1px rgba(0, 0, 0, 0.55);
 }
 
 .corner {
