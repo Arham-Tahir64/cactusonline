@@ -23,6 +23,21 @@ npm run client:build        # production build of the client into public/ (serve
 npm run server              # single-process server, serving the last client:build output at :2567
 ```
 
+### Runtime configuration
+
+- Browser production builds use the page origin automatically (`https` becomes `wss`).
+- Desktop builds must set `VITE_COLYSEUS_URL` to the hosted secure WebSocket endpoint, for example `wss://cactus.example.com`.
+- The server reads `PORT` (default `2567`) and exposes `GET /healthz` for container health checks.
+
+Build and run the provider-neutral production container with:
+
+```sh
+docker build -t cactus-online .
+docker run --rm -p 2567:2567 -e PORT=2567 cactus-online
+```
+
+The beta deployment is intentionally single-replica. Scaling beyond one instance requires shared Colyseus presence/matchmaking plus sticky WebSocket routing.
+
 **To play during development:** run `npm run dev`, then open **http://localhost:5173** in two or more tabs. Create a game in one tab, join with the `CAC-XXXX` code in the others.
 
 **To play a single-process build:** `npm run client:build && npm run server`, then open **http://localhost:2567**.

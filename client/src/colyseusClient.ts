@@ -1,10 +1,25 @@
 import { Client } from 'colyseus.js';
 
-// In dev, Vite serves the client on :5173 while Colyseus runs on :2567.
-// In production, the client is built into the server's public/ dir and
-// served same-origin, so we can derive the endpoint from location.
-const endpoint = import.meta.env.DEV
-  ? 'ws://localhost:2567'
-  : `${location.protocol.replace('http', 'ws')}//${location.host}`;
+export function resolveEndpoint(
+  currentLocation: Pick<Location, 'protocol' | 'host'>,
+  configured = import.meta.env.VITE_COLYSEUS_URL,
+  isDev = import.meta.env.DEV,
+): string {
+  const override = configured?.trim();
+  if (override) {
+    if (!/^wss?:\/\//i.test(override)) {
+      throw new Error('VITE_COLYSEUS_URL must begin with ws:// or wss://');
+    }
+    return override.replace(/\/$/, '');
+  }
+
+  if (isDev) return 'ws://localhost:2567';
+  if (currentLocation.protocol === 'https:') return `wss://${currentLocation.host}`;
+  if (currentLocation.protocol === 'http:') return `ws://${currentLocation.host}`;
+
+  throw new Error('A secure VITE_COLYSEUS_URL is required for the desktop build.');
+}
+
+const endpoint = resolveEndpoint(location);
 
 export const client = new Client(endpoint);

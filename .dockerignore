@@ -1,0 +1,7 @@
+.git
+.vscode
+node_modules
+client/node_modules
+public/assets
+desktop/out
+npm-debug.log*

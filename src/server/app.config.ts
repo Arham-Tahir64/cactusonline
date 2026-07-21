@@ -11,6 +11,9 @@ export default config({
     gameServer.define('cactus', CactusRoom);
   },
   initializeExpress: (app) => {
+    app.get('/healthz', (_request, response) => {
+      response.status(200).json({ status: 'ok', service: 'cactus-server' });
+    });
     app.use(express.static(publicDir));
   },
 });
