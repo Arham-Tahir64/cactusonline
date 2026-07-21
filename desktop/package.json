@@ -15,7 +15,8 @@
     "make": "npm run build:renderer && npm run build:main && electron-forge make --platform=win32 --arch=x64",
     "test": "npm run build:main && node --test test/*.test.cjs",
     "smoke": "node scripts/smoke.cjs",
-    "smoke:packaged": "node scripts/smoke.cjs --packaged"
+    "smoke:packaged": "node scripts/smoke.cjs --packaged",
+    "capture:visual": "electron scripts/visual-capture.cjs"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.8.1",
