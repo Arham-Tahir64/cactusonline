@@ -80,6 +80,21 @@ describe('lobby', () => {
     void bob;
   });
 
+  it('assigns distinct curated avatars when players request the same one', async () => {
+    const room = await server.createRoom('cactus', {});
+    const alice = await server.connectTo(room, { name: 'Alice', avatarId: 'sage' });
+    const aliceInbox = collect(alice);
+    const bob = await server.connectTo(room, { name: 'Bob', avatarId: 'sage' });
+
+    await until(() => aliceInbox.lobbies.at(-1)?.players.length === 2, 'two-player avatar lobby');
+    expect(aliceInbox.lobbies.at(-1).players.map((p: any) => p.avatarId)).toEqual([
+      'sage',
+      'ranger',
+    ]);
+    await alice.leave();
+    await bob.leave();
+  });
+
   it('only the host can start, and 2+ players are required', async () => {
     const room = await server.createRoom('cactus', { peekMs: 80 });
     const alice = await server.connectTo(room, { name: 'Alice' });

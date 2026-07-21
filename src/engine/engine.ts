@@ -4,7 +4,9 @@ import {
   shuffle,
   type Rng,
 } from './deck.js';
+import { AVATAR_IDS } from './types.js';
 import type {
+  AvatarId,
   ActionType,
   BoardSlot,
   BoardTarget,
@@ -54,7 +56,7 @@ export class CactusGame {
   private readonly rng: Rng;
   private slotCounter = 0;
 
-  constructor(players: { id: string; name: string }[], options: GameOptions = {}) {
+  constructor(players: { id: string; name: string; avatarId?: AvatarId }[], options: GameOptions = {}) {
     if (players.length < 2 || players.length > 8) {
       throw new GameError('invalid-player-count', 'Cactus supports 2-8 players.');
     }
@@ -67,9 +69,10 @@ export class CactusGame {
 
     const drawPile = options.deck ? [...options.deck] : shuffle(createDeck(), this.rng);
 
-    const playerStates: PlayerState[] = players.map((p) => ({
+    const playerStates: PlayerState[] = players.map((p, index) => ({
       id: p.id,
       name: p.name,
+      avatarId: p.avatarId ?? AVATAR_IDS[index % AVATAR_IDS.length]!,
       board: [],
       isConnected: true,
       hasCalledCactus: false,
@@ -146,6 +149,7 @@ export class CactusGame {
       players: s.players.map((p) => ({
         id: p.id,
         name: p.name,
+        avatarId: p.avatarId,
         isConnected: p.isConnected,
         hasCalledCactus: p.hasCalledCactus,
         board: p.board.map((slot) => ({

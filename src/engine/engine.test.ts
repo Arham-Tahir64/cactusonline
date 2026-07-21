@@ -449,6 +449,18 @@ describe('deck exhaustion', () => {
 });
 
 describe('redacted player views', () => {
+  it('preserves each player avatar in redacted views', () => {
+    const game = new CactusGame([
+      { id: 'p1', name: 'Alice', avatarId: 'vaquera' },
+      { id: 'p2', name: 'Bob', avatarId: 'botanist' },
+    ]);
+
+    expect(game.getPlayerView('p1').players.map((player) => player.avatarId)).toEqual([
+      'vaquera',
+      'botanist',
+    ]);
+  });
+
   it('never leaks face-down card faces or another player’s drawn card', () => {
     const game = basicGame([c('5', 'H')]);
     game.drawFromDeck('p1');

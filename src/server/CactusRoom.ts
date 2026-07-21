@@ -1,8 +1,17 @@
 import { Room, type Client } from 'colyseus';
-import { CactusGame, GameError, type BoardTarget, type Card } from '../engine/index.js';
+import {
+  AVATAR_IDS,
+  CactusGame,
+  GameError,
+  isAvatarId,
+  type AvatarId,
+  type BoardTarget,
+  type Card,
+} from '../engine/index.js';
 
 interface JoinOptions {
   name?: string;
+  avatarId?: string;
 }
 
 interface CreateOptions {
@@ -17,6 +26,7 @@ interface CreateOptions {
 interface LobbyPlayer {
   sessionId: string;
   name: string;
+  avatarId: AvatarId;
 }
 
 const ROOM_CODE_CHANNEL = 'cactus:roomcodes';
@@ -134,7 +144,16 @@ export class CactusRoom extends Room {
       throw new Error('Game already in progress — spectators are not supported yet.');
     }
     const name = (options.name ?? '').trim().slice(0, 20) || `Player ${this.lobby.length + 1}`;
-    this.lobby.push({ sessionId: client.sessionId, name });
+    if (options.avatarId !== undefined && !isAvatarId(options.avatarId)) {
+      throw new Error('Unknown avatar selection.');
+    }
+    const requested = options.avatarId as AvatarId | undefined;
+    const used = new Set(this.lobby.map((player) => player.avatarId));
+    const avatarId =
+      (requested && !used.has(requested) ? requested : AVATAR_IDS.find((id) => !used.has(id))) ??
+      requested ??
+      AVATAR_IDS[this.lobby.length % AVATAR_IDS.length]!;
+    this.lobby.push({ sessionId: client.sessionId, name, avatarId });
     if (!this.hostSessionId) this.hostSessionId = client.sessionId;
     this.broadcastLobby();
   }
@@ -197,7 +216,7 @@ export class CactusRoom extends Room {
     }
     this.lock(); // no more joins once cards are dealt
     this.engine = new CactusGame(
-      this.lobby.map((p) => ({ id: p.sessionId, name: p.name })),
+      this.lobby.map((p) => ({ id: p.sessionId, name: p.name, avatarId: p.avatarId })),
       this.seed !== undefined ? { seed: this.seed } : {},
     );
     this.broadcast('event', { type: 'game-started', peekMs: this.peekMs });
@@ -265,7 +284,11 @@ export class CactusRoom extends Room {
   private broadcastLobby() {
     this.broadcast('lobby', {
       roomId: this.roomId,
-      players: this.lobby.map((p) => ({ sessionId: p.sessionId, name: p.name })),
+      players: this.lobby.map((p) => ({
+        sessionId: p.sessionId,
+        name: p.name,
+        avatarId: p.avatarId,
+      })),
       hostSessionId: this.hostSessionId,
     });
   }

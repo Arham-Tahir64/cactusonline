@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Room } from 'colyseus.js';
 import { client } from './colyseusClient';
-import type { BoardTarget, Card, PlayerView, Scores } from '@engine/types';
+import type { AvatarId, BoardTarget, Card, PlayerView, Scores } from '@engine/types';
 
 export type ClickMode =
   | null
@@ -19,6 +19,7 @@ export type ClickMode =
 export interface LobbyPlayer {
   sessionId: string;
   name: string;
+  avatarId: AvatarId;
 }
 
 export interface LobbyMessage {
@@ -44,8 +45,8 @@ interface CactusState {
   connecting: boolean;
   lastError: string | null;
 
-  createGame(name: string): Promise<void>;
-  joinGame(code: string, name: string): Promise<void>;
+  createGame(name: string, avatarId?: AvatarId): Promise<void>;
+  joinGame(code: string, name: string, avatarId?: AvatarId): Promise<void>;
   leave(): void;
   send(type: string, payload?: unknown): void;
   setClickMode(mode: ClickMode, prompt?: string): void;
@@ -102,10 +103,10 @@ export const useCactusStore = create<CactusState>((set, get) => ({
   connecting: false,
   lastError: null,
 
-  async createGame(name) {
+  async createGame(name, avatarId = 'ranger') {
     set({ connecting: true, lastError: null });
     try {
-      const room = await client.create('cactus', { name });
+      const room = await client.create('cactus', { name, avatarId });
       wireRoom(room, set, get);
       set({ room, screen: 'lobby' });
     } catch (err) {
@@ -115,10 +116,10 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     }
   },
 
-  async joinGame(code, name) {
+  async joinGame(code, name, avatarId = 'ranger') {
     set({ connecting: true, lastError: null });
     try {
-      const room = await client.joinById(code.trim().toUpperCase(), { name });
+      const room = await client.joinById(code.trim().toUpperCase(), { name, avatarId });
       wireRoom(room, set, get);
       set({ room, screen: 'lobby' });
     } catch (err) {

@@ -1,4 +1,20 @@
 export type Suit = 'S' | 'H' | 'D' | 'C';
+export const AVATAR_IDS = [
+  'ranger',
+  'maverick',
+  'sage',
+  'prospector',
+  'vaquera',
+  'outlaw',
+  'botanist',
+  'drifter',
+] as const;
+export type AvatarId = (typeof AVATAR_IDS)[number];
+
+export function isAvatarId(value: unknown): value is AvatarId {
+  return typeof value === 'string' && (AVATAR_IDS as readonly string[]).includes(value);
+}
+
 export type Rank =
   | 'A' | '2' | '3' | '4' | '5' | '6' | '7'
   | '8' | '9' | '10' | 'J' | 'Q' | 'K';
@@ -19,6 +35,7 @@ export interface BoardSlot {
 export interface PlayerState {
   id: string;
   name: string;
+  avatarId: AvatarId;
   board: BoardSlot[]; // variable length, starts at 4
   isConnected: boolean;
   hasCalledCactus: boolean;
@@ -102,6 +119,7 @@ export interface RedactedSlot {
 export interface RedactedPlayer {
   id: string;
   name: string;
+  avatarId: AvatarId;
   board: RedactedSlot[];
   isConnected: boolean;
   hasCalledCactus: boolean;
