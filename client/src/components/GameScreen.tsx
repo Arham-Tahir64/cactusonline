@@ -6,6 +6,7 @@ import ActionBar from './ActionBar';
 import Scoreboard from './Scoreboard';
 import EventLog from './EventLog';
 import GameHeader from './GameHeader';
+import TurnGuide from './TurnGuide';
 
 export default function GameScreen() {
   const view = useCactusStore((s) => s.view);
@@ -47,13 +48,14 @@ export default function GameScreen() {
         {view.cactusCallerId && <span>🌵 called by {nameOf(view, view.cactusCallerId)}</span>}
       </div>
 
-      <div className="game-stage">
+      <div className="game-stage" data-player-count={view.players.length}>
         {view.phase === 'peek' && (
           <div className="peek-banner">👀 Peek phase — memorize your bottom two cards before they turn face-down.</div>
         )}
 
         <Table />
         <ActionBar myTurn={myTurn} />
+        <TurnGuide myTurn={myTurn} />
         {scores && <Scoreboard />}
         <EventLog />
       </div>

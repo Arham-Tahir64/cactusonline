@@ -1,4 +1,5 @@
 import { useCactusStore } from '../store';
+import { rotatePlayersToLocal, seatsFor } from '../seating';
 import PlayerBoard from './PlayerBoard';
 import CenterPile from './CenterPile';
 
@@ -16,10 +17,9 @@ export default function Table() {
   if (!view || !room) return null;
 
   const me = room.sessionId;
-  const myIndex = view.players.findIndex((p) => p.id === me);
-  const seated =
-    myIndex === -1 ? view.players : [...view.players.slice(myIndex), ...view.players.slice(0, myIndex)];
+  const seated = rotatePlayersToLocal(view.players, me);
   const n = seated.length;
+  const layout = seatsFor(n);
 
   return (
     <div className="table table-circle" data-player-count={n}>
@@ -27,14 +27,13 @@ export default function Table() {
         <CenterPile />
       </div>
       {seated.map((player, i) => {
-        const angle = Math.PI / 2 + (2 * Math.PI * i) / n;
-        const left = 50 + 43 * Math.cos(angle);
-        const top = 50 + 36 * Math.sin(angle);
+        const position = layout[i]!;
         return (
           <div
             key={player.id}
             className={`seat ${player.id === me ? 'local-seat' : 'opponent-seat'}`}
-            style={{ left: `${left}%`, top: `${top}%` }}
+            data-seat-index={i}
+            style={{ left: `${position.left}%`, top: `${position.top}%` }}
           >
             <PlayerBoard player={player} isMe={player.id === me} />
           </div>

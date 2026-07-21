@@ -27,10 +27,11 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
 
       {!holding && (
         <div className="turn-actions">
-          <button disabled={!canAct} onClick={() => send('draw-deck')}>
-            Draw from deck
+          <button className="draw-action" disabled={!canAct} onClick={() => send('draw-deck')}>
+            <span aria-hidden="true">▱</span> Draw deck
           </button>
           <button
+            className="discard-action"
             disabled={!canAct}
             onClick={() =>
               setClickMode(
@@ -39,9 +40,10 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
               )
             }
           >
-            Take discard
+            <span aria-hidden="true">⇧</span> Take discard
           </button>
           <button
+            className="cactus-action"
             disabled={!canAct || view.phase !== 'playing'}
             onClick={() => {
               if (confirm('Call Cactus? This starts the final round and cannot be undone.')) {
@@ -49,13 +51,14 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
               }
             }}
           >
-            Call CACTUS
+            <span aria-hidden="true">🌵</span> Call Cactus
           </button>
           <button
+            className="stack-action"
             disabled={!view.matchWindowOpen}
             onClick={() => setClickMode('stack', 'STACK: click any card you think matches the discard')}
           >
-            Stack! (match)
+            Stack!
           </button>
         </div>
       )}
