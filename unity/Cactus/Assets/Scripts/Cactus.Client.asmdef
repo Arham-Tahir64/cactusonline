@@ -2,7 +2,8 @@
   "name": "Cactus.Client",
   "rootNamespace": "Cactus",
   "references": [
-    "ColyseusSDK"
+    "ColyseusSDK",
+    "UnityEngine.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

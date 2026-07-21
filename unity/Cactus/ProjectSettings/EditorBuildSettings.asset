@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/CactusTable.unity
+    guid: feca495f339ee3d45bc9d033b2847d94
   m_configObjects: {}
