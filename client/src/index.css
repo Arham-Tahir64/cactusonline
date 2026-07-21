@@ -1086,15 +1086,70 @@ button:focus-visible {
   max-height: 6.5rem;
   overflow-y: auto;
   font-size: 0.72rem;
-  color: var(--muted);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  color: #d8c4a4;
+  border: 1px solid rgba(239, 207, 160, 0.22);
+  border-radius: 12px;
   padding: 0.5rem 0.6rem;
-  background: #fafafa;
+  background: linear-gradient(145deg, rgba(28, 24, 19, 0.92), rgba(10, 9, 7, 0.94));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42), inset 0 1px rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
 }
 
 .event-line {
   padding: 0.15rem 0;
+}
+
+/* The minimum supported desktop window is 1100×700. Pull the two-player
+   layout inward at laptop sizes so both complete boards remain visible and
+   the action panel never masks the local player's cards. */
+@media (max-width: 1400px) and (max-height: 820px) {
+  .table-circle[data-player-count='2'] .local-seat {
+    top: 76% !important;
+  }
+
+  .table-circle[data-player-count='2'] .opponent-seat {
+    top: 18% !important;
+  }
+
+  .game-screen .turn-banner {
+    top: 116px;
+    left: 73%;
+  }
+
+  .game-screen[data-phase='peek'] .turn-banner {
+    top: 116px;
+  }
+
+  .table-circle[data-player-count='2'] .player-board {
+    --seat-scale: 0.94;
+  }
+
+  .table-circle[data-player-count='2'] .player-board.me {
+    --seat-scale: 0.96;
+  }
+
+  .action-bar {
+    left: auto;
+    right: 16px;
+    bottom: 16px;
+    width: min(330px, 32vw);
+    transform: none;
+  }
+
+  .turn-actions,
+  .drawn-panel {
+    gap: 0.4rem;
+  }
+
+  .action-bar button {
+    flex: 1 1 44%;
+    padding-inline: 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .event-log {
+    width: min(260px, 24vw);
+  }
 }
 
 @media (max-width: 420px) {
@@ -1136,7 +1191,7 @@ button:focus-visible {
   }
 
   .event-log {
-    background: #1c1d20;
+    background: linear-gradient(145deg, rgba(28, 24, 19, 0.92), rgba(10, 9, 7, 0.94));
   }
 
   .lobby-players li,
