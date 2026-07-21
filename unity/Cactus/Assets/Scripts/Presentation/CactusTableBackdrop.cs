@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Cactus.Presentation
@@ -29,6 +30,10 @@ namespace Cactus.Presentation
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight = 0.55f;
+            if (FindFirstObjectByType<EventSystem>() == null)
+            {
+                new GameObject("Event System", typeof(EventSystem), typeof(StandaloneInputModule));
+            }
 
             var root = CreatePanel("Backdrop", canvas.transform, Ink, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             AddAmbientBackdrop(root.transform);

@@ -10,7 +10,7 @@ namespace Cactus.Editor
         public static void Run()
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            var root = new GameObject("Cactus App", typeof(CactusTableBackdrop));
+            var root = new GameObject("Cactus App", typeof(CactusTableBackdrop), typeof(CactusLobbyController));
             EditorSceneManager.SaveScene(scene, "Assets/Scenes/CactusTable.unity");
             EditorBuildSettings.scenes = new[]
             {
