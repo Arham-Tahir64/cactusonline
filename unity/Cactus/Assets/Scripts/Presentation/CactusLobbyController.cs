@@ -160,6 +160,8 @@ namespace Cactus.Presentation
             return string.IsNullOrWhiteSpace(nameInput.text) ? "Player" : nameInput.text.Trim();
         }
 
+        public CactusRoomClient RoomClient => roomClient;
+
         private static GameObject CreatePanel(string name, Transform parent, Color color, Vector2 anchor, Vector2 size)
         {
             var target = new GameObject(name, typeof(RectTransform), typeof(Image));
