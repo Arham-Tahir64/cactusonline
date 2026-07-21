@@ -39,7 +39,7 @@ export default function GameScreen() {
   const myTurn = view.currentPlayerId === room.sessionId;
 
   return (
-    <section className="game-screen">
+    <section className="game-screen" data-phase={view.phase}>
       <GameHeader />
 
       <div className="turn-banner">
@@ -47,14 +47,16 @@ export default function GameScreen() {
         {view.cactusCallerId && <span>🌵 called by {nameOf(view, view.cactusCallerId)}</span>}
       </div>
 
-      {view.phase === 'peek' && (
-        <div className="peek-banner">👀 Peek phase — memorize your bottom two cards before it ends.</div>
-      )}
+      <div className="game-stage">
+        {view.phase === 'peek' && (
+          <div className="peek-banner">👀 Peek phase — memorize your bottom two cards before they turn face-down.</div>
+        )}
 
-      <Table />
-      <ActionBar myTurn={myTurn} />
-      {scores && <Scoreboard />}
-      <EventLog />
+        <Table />
+        <ActionBar myTurn={myTurn} />
+        {scores && <Scoreboard />}
+        <EventLog />
+      </div>
     </section>
   );
 }

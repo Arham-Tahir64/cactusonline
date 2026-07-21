@@ -479,6 +479,10 @@ button:focus-visible {
   font-size: 0.72rem;
 }
 
+.game-screen[data-phase='peek'] .turn-banner {
+  top: 132px;
+}
+
 .modal-scrim {
   position: fixed;
   inset: 0;
@@ -563,50 +567,92 @@ button:focus-visible {
 }
 
 .peek-banner {
+  position: absolute;
+  z-index: 24;
+  top: 86px;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
   font-weight: 600;
-  color: var(--accent-dark);
-  background: #eaf0ff;
-  border: 1px solid #c9dbff;
-  border-radius: var(--radius);
-  padding: 0.5rem 0.75rem;
+  color: #f8ddb1;
+  background: rgba(16, 13, 10, 0.88);
+  border: 1px solid rgba(236, 193, 118, 0.35);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
 }
 
-/* 2-player table: a plain vertical stack (opponent, pile, you) — a circle
-   wastes the unused side positions and crowds the pile between the boards. */
-.table-linear {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.4rem;
-  width: 100%;
-  max-width: 340px;
-  margin: 0.5rem auto;
+.game-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
 }
 
-/* 3+ player table: seats positioned via left/top percentages around an
-   ellipse. Seats are centered on their point via translate(-50%,-50%), so
-   ones near the top/bottom edge extend outside the table's own box — the
-   vertical margin gives them room without colliding with page elements
-   above/below the table. */
 .table-circle {
-  position: relative;
-  width: min(90vw, 460px);
-  aspect-ratio: 1 / 1;
-  margin: 55px auto;
+  position: absolute;
+  z-index: 5;
+  top: 55%;
+  left: 50%;
+  width: min(90vw, 1480px);
+  height: min(72vh, 700px);
+  min-height: 500px;
+  transform: translate(-50%, -50%);
+  border: clamp(12px, 1.4vw, 22px) solid #4a2a1a;
+  border-radius: 48% 48% 43% 43% / 46% 46% 40% 40%;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(108, 132, 56, 0.2), transparent 48%),
+    radial-gradient(circle at 24% 30%, rgba(255, 255, 255, 0.028) 0 1px, transparent 2px) 0 0 / 8px 8px,
+    linear-gradient(165deg, #31452a, #1e321f 58%, #17271a);
+  box-shadow:
+    0 36px 80px rgba(0, 0, 0, 0.72),
+    0 0 0 4px #160d09,
+    0 0 0 8px #6b3b20,
+    0 0 30px rgba(213, 121, 35, 0.28),
+    inset 0 0 70px rgba(3, 7, 3, 0.6),
+    inset 0 4px rgba(239, 170, 87, 0.2);
+}
+
+.table-circle::before,
+.table-circle::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(239, 164, 81, 0.34);
+}
+
+.table-circle::after {
+  inset: 7px;
+  border-color: rgba(8, 6, 4, 0.72);
 }
 
 .table-center {
   position: absolute;
-  top: 50%;
+  z-index: 3;
+  top: 47%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
 
 .seat {
   position: absolute;
+  z-index: 6;
   transform: translate(-50%, -50%);
-  max-width: 40%;
+  max-width: none;
+}
+
+.local-seat {
+  z-index: 8;
+}
+
+.table-circle[data-player-count='2'] .seat {
+  --seat-scale: 1.12;
+}
+
+.table-circle[data-player-count='7'] .seat,
+.table-circle[data-player-count='8'] .seat {
+  --seat-scale: 0.78;
 }
 
 .player-board {
@@ -842,8 +888,12 @@ button:focus-visible {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  position: sticky;
-  bottom: 0;
+  position: absolute;
+  z-index: 18;
+  left: 50%;
+  bottom: 18px;
+  width: min(68vw, 820px);
+  transform: translateX(-50%);
   box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
 }
 
@@ -905,6 +955,11 @@ button:focus-visible {
 /* ---------- Event log ---------- */
 
 .event-log {
+  position: absolute;
+  z-index: 17;
+  left: 16px;
+  bottom: 16px;
+  width: min(280px, 23vw);
   max-height: 6.5rem;
   overflow-y: auto;
   font-size: 0.72rem;
