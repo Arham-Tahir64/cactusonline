@@ -9,13 +9,13 @@ The deterministic engine suite and real local Colyseus integration clients cover
 
 ## Coverage exercised
 
-- Lobby creation/join, room codes, host-only start, avatar allocation, and 2–8 player engine rounds.
+- Lobby creation/join, room codes, host-only start, avatar allocation, 2–8 player engine rounds, and the real room's eight-client capacity/ninth-client rejection.
 - Timed peek transition and post-peek redaction for every player and slot.
 - Draw-deck, take-discard swap, held-card swap, direct discard, turn order, and duplicate/out-of-turn rejection.
 - 7/8 own peek, 9/10 opponent peek, Jack blind swap, and Queen private look plus mandatory swap.
 - Stack success on own/opponent boards, give-card resolution, incorrect penalties, timeout, duplicate delivery, and first-message-wins races.
 - Cactus, final turns, final Stack window, reveal, scoring/ties, and rematch transition.
-- Dropped connection, seat hold, same-session reconnect, fresh redacted reconnect state, explicit host departure, host transfer, and rematch without departed seats.
+- Dropped connection, seat hold, same-session reconnect, reconnect while privately holding a draw, fresh redacted reconnect state, explicit host departure, host transfer, and rematch without departed seats.
 - Deck exhaustion and discard reshuffle.
 
 ## Bugs fixed
@@ -27,7 +27,7 @@ The deterministic engine suite and real local Colyseus integration clients cover
 
 ## Automated evidence
 
-- Focused engine and room run: 50 tests passed (35 engine, 15 room).
+- Focused engine and room run: 52 tests passed (35 engine, 17 room).
 - TypeScript: `tsc --noEmit` passed.
 - The room tests connect actual `colyseus.js` clients to the local `@colyseus/testing` server and assert wire payloads, private messages, timers, concurrent command ordering, disconnects, and reconnection.
 

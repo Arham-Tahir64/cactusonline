@@ -114,6 +114,41 @@ describe('lobby', () => {
     await until(() => bobInbox.errors.length > 0, 'not-host error');
     expect(bobInbox.errors.at(-1).code).toBe('not-host');
   });
+
+  it('supports eight seats, rejects a ninth, and redacts every dealt board', async () => {
+    const room = await server.createRoom('cactus', { peekMs: 80, seed: 88 });
+    const clients: Room[] = [];
+    const inboxes: Inbox[] = [];
+    for (let index = 0; index < 8; index++) {
+      const client = await server.connectTo(room, { name: `Player ${index + 1}` });
+      clients.push(client);
+      inboxes.push(collect(client));
+    }
+
+    await expect(server.connectTo(room, { name: 'Ninth player' })).rejects.toThrow();
+    clients[0]!.send('start');
+    await until(() => inboxes.every((inbox) => inbox.views.length > 0), 'eight private views');
+
+    for (let viewerIndex = 0; viewerIndex < inboxes.length; viewerIndex++) {
+      const view = inboxes[viewerIndex]!.view();
+      expect(view.players).toHaveLength(8);
+      expect(view.peekCards).toHaveLength(2);
+      expect(view.peekCards!.every((peek) =>
+        view.players[viewerIndex]!.board.some((slot) => slot.slotId === peek.slotId),
+      )).toBe(true);
+      for (const player of view.players) {
+        for (const slot of player.board) expect(slot.card).toBeNull();
+      }
+    }
+
+    await until(() => inboxes.every((inbox) => inbox.view().phase === 'playing'), 'eight-seat peek end');
+    for (const inbox of inboxes) {
+      expect(inbox.view().peekCards).toBeNull();
+      for (const player of inbox.view().players) {
+        for (const slot of player.board) expect(slot.card).toBeNull();
+      }
+    }
+  });
 });
 
 describe('game start & redaction', () => {
@@ -427,6 +462,34 @@ describe('disconnection', () => {
     await until(() => reconnectedInbox.views.length > 0, 'reconnected private view');
 
     expect(reconnected.sessionId).toBe(originalSessionId);
+    expect(reconnectedInbox.view().peekCards).toBeNull();
+    for (const player of reconnectedInbox.view().players) {
+      for (const slot of player.board) expect(slot.card).toBeNull();
+    }
+  });
+
+  it('restores a privately held draw only to its reconnecting owner', async () => {
+    const { alice, bob, aliceInbox, bobInbox } = await twoPlayerRoom();
+    alice.send('start');
+    await until(() => aliceInbox.views.length > 0 && aliceInbox.view().phase === 'playing', 'playing phase');
+    alice.send('draw-deck');
+    await until(() => aliceInbox.view().turnStage === 'holding-drawn-card', 'private held draw');
+    const heldCard = aliceInbox.view().drawnCard;
+    expect(heldCard).not.toBeNull();
+    expect(bobInbox.view().drawnCard).toBeNull();
+
+    const token = alice.reconnectionToken;
+    await alice.leave(false);
+    await until(
+      () => bobInbox.view().players.find((player) => player.id === alice.sessionId)?.isConnected === false,
+      'held-draw disconnect registration',
+    );
+    const reconnected = await server.sdk.reconnect(token);
+    const reconnectedInbox = collect(reconnected);
+    await until(() => reconnectedInbox.views.length > 0, 'held-draw reconnect view');
+
+    expect(reconnectedInbox.view().drawnCard).toEqual(heldCard);
+    expect(bobInbox.view().drawnCard).toBeNull();
     expect(reconnectedInbox.view().peekCards).toBeNull();
     for (const player of reconnectedInbox.view().players) {
       for (const slot of player.board) expect(slot.card).toBeNull();
