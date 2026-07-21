@@ -5,3 +5,19 @@ desktop/node_modules/
 desktop/dist/
 desktop/renderer/
 desktop/out/
+
+# Unity generated editor, build, and cache files
+unity/**/[Ll]ibrary/
+unity/**/[Tt]emp/
+unity/**/[Oo]bj/
+unity/**/[Bb]uild/
+unity/**/[Bb]uilds/
+unity/**/[Ll]ogs/
+unity/**/[Uu]ser[Ss]ettings/
+unity/**/*.csproj
+unity/**/*.sln
+unity/**/*.user
+unity/**/*.pidb
+unity/**/*.pdb
+unity/**/*.opendb
+unity/**/*.VC.db
