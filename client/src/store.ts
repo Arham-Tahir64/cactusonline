@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Room } from 'colyseus.js';
 import { client } from './colyseusClient';
-import type { AvatarId, BoardTarget, Card, PlayerView, Scores } from '@engine/types';
+import type { AvatarId, BoardTarget, Card, RoomView, Scores } from '@engine/types';
 
 export type ClickMode =
   | null
@@ -34,7 +34,7 @@ interface CactusState {
   screen: 'join' | 'lobby' | 'game';
   room: Room | null;
   lobby: LobbyMessage | null;
-  view: PlayerView | null;
+  view: RoomView | null;
   events: GameEvent[];
   scores: Scores | null;
   /** Local-only memory of card faces this client has been shown (peeks, action looks). */
@@ -63,7 +63,7 @@ function wireRoom(
     set({ lobby: msg, screen: get().view ? 'game' : 'lobby' });
   });
 
-  room.onMessage('view', (msg: PlayerView) => {
+  room.onMessage('view', (msg: RoomView) => {
     const known = { ...get().known };
     if (msg.peekCards) {
       for (const p of msg.peekCards) known[p.slotId] = p.card;

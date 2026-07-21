@@ -60,6 +60,9 @@ export class CactusRoom extends Room {
   private peekMs = 10_000;
   private matchWindowMs = 5_000;
   private seed: number | undefined;
+  private peekEndsAtMs: number | null = null;
+  private matchWindowEndsAtMs: number | null = null;
+  private timedDiscardEventId: string | null = null;
 
   async onCreate(options: CreateOptions = {}) {
     this.roomId = await this.generateRoomCode();
@@ -219,10 +222,12 @@ export class CactusRoom extends Room {
       this.lobby.map((p) => ({ id: p.sessionId, name: p.name, avatarId: p.avatarId })),
       this.seed !== undefined ? { seed: this.seed } : {},
     );
+    this.peekEndsAtMs = Date.now() + this.peekMs;
     this.broadcast('event', { type: 'game-started', peekMs: this.peekMs });
     this.clock.setTimeout(() => {
       if (this.engine?.phase === 'peek') {
         this.engine.startPlaying();
+        this.peekEndsAtMs = null;
         this.broadcast('event', { type: 'peek-ended' });
         this.broadcastViews();
       }
@@ -249,20 +254,27 @@ export class CactusRoom extends Room {
       this.broadcastLobby();
       return;
     }
-    this.broadcastViews();
-
     const window = engine.getState().matchWindow;
     if (window?.open) {
       const eventId = window.discardEventId;
-      this.clock.setTimeout(() => {
-        const current = this.engine?.getState().matchWindow;
-        if (this.engine && current?.discardEventId === eventId && current.open) {
-          this.engine.closeMatchWindow();
-          this.broadcast('event', { type: 'match-window-closed', discardEventId: eventId });
-          this.afterMutation(); // may fire the final reveal → scores broadcast
-        }
-      }, this.matchWindowMs);
+      if (this.timedDiscardEventId !== eventId) {
+        this.timedDiscardEventId = eventId;
+        this.matchWindowEndsAtMs = Date.now() + this.matchWindowMs;
+        this.clock.setTimeout(() => {
+          const current = this.engine?.getState().matchWindow;
+          if (this.engine && current?.discardEventId === eventId && current.open) {
+            this.engine.closeMatchWindow();
+            this.broadcast('event', { type: 'match-window-closed', discardEventId: eventId });
+            this.afterMutation(); // may fire the final reveal → scores broadcast
+          }
+        }, this.matchWindowMs);
+      }
+    } else {
+      this.timedDiscardEventId = null;
+      this.matchWindowEndsAtMs = null;
     }
+
+    this.broadcastViews();
 
     if (engine.phase === 'reveal') {
       this.broadcast('scores', engine.getScores());
@@ -274,7 +286,12 @@ export class CactusRoom extends Room {
     if (!engine) return;
     for (const client of this.clients) {
       try {
-        client.send('view', engine.getPlayerView(client.sessionId));
+        client.send('view', {
+          ...engine.getPlayerView(client.sessionId),
+          serverNowMs: Date.now(),
+          peekEndsAtMs: this.peekEndsAtMs,
+          matchWindowEndsAtMs: this.matchWindowEndsAtMs,
+        });
       } catch {
         // Client not part of this game (shouldn't happen; room is locked).
       }

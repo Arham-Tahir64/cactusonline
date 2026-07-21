@@ -2,7 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { boot, type ColyseusTestServer } from '@colyseus/testing';
 import type { Room } from 'colyseus.js';
 import appConfig from './app.config.js';
-import type { PlayerView } from '../engine/index.js';
+import type { RoomView } from '../engine/index.js';
 
 let server: ColyseusTestServer;
 
@@ -17,13 +17,13 @@ beforeEach(async () => {
 });
 
 interface Inbox {
-  views: PlayerView[];
+  views: RoomView[];
   lobbies: any[];
   events: any[];
   errors: any[];
   scores: any[];
   revealed: any[];
-  view(): PlayerView; // latest view
+  view(): RoomView; // latest view
 }
 
 function collect(client: Room): Inbox {
@@ -113,6 +113,22 @@ describe('lobby', () => {
 });
 
 describe('game start & redaction', () => {
+  it('sends reconnect-safe peek and match-window deadlines', async () => {
+    const { alice, aliceInbox } = await twoPlayerRoom();
+    const beforeStart = Date.now();
+    alice.send('start');
+    await until(() => aliceInbox.views.length > 0, 'peek view with deadline');
+    expect(aliceInbox.view().peekEndsAtMs).toBeGreaterThan(beforeStart);
+    expect(aliceInbox.view().serverNowMs).toBeGreaterThanOrEqual(beforeStart);
+
+    await until(() => aliceInbox.view().phase === 'playing', 'playing phase');
+    alice.send('draw-deck');
+    await until(() => aliceInbox.view().turnStage === 'holding-drawn-card', 'drawn card');
+    alice.send('discard-drawn');
+    await until(() => aliceInbox.view().matchWindowEndsAtMs !== null, 'match deadline');
+    expect(aliceInbox.view().matchWindowEndsAtMs).toBeGreaterThan(aliceInbox.view().serverNowMs);
+  });
+
   it('deals into peek phase; clients see their own peek cards and zero face-down faces', async () => {
     const { alice, aliceInbox, bobInbox } = await twoPlayerRoom();
     alice.send('start');

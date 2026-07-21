@@ -150,3 +150,10 @@ export interface PlayerView {
   /** Your own peek cards during the peek phase (bottom two), null otherwise. */
   peekCards: { slotId: string; card: Card }[] | null;
 }
+
+/** Server transport metadata layered over the deterministic engine view. */
+export interface RoomView extends PlayerView {
+  serverNowMs: number;
+  peekEndsAtMs: number | null;
+  matchWindowEndsAtMs: number | null;
+}
