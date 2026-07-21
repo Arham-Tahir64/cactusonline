@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Cactus.Network;
+using Cactus.Protocol;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,7 @@ namespace Cactus.Presentation
         private Button createButton;
         private Button joinButton;
         private Button startButton;
-        private string displayedLobbyId;
+        private LobbyDto displayedLobby;
 
         private void Start()
         {
@@ -26,7 +27,7 @@ namespace Cactus.Presentation
 
         private void Update()
         {
-            if (roomClient != null && roomClient.Lobby != null && roomClient.Lobby.roomId != displayedLobbyId)
+            if (roomClient != null && roomClient.Lobby != null && !ReferenceEquals(roomClient.Lobby, displayedLobby))
             {
                 RenderLobby();
             }
@@ -136,15 +137,15 @@ namespace Cactus.Presentation
 
         private void RenderLobby()
         {
-            displayedLobbyId = roomClient.Lobby.roomId;
-            codeInput.text = displayedLobbyId;
-            var lines = "Room " + displayedLobbyId + "\n";
-            foreach (var player in roomClient.Lobby.players)
+            displayedLobby = roomClient.Lobby;
+            codeInput.text = displayedLobby.roomId;
+            var lines = "Room " + displayedLobby.roomId + "\n";
+            foreach (var player in displayedLobby.players)
             {
-                lines += "• " + player.name + (player.sessionId == roomClient.Lobby.hostSessionId ? "  ♛" : "") + "\n";
+                lines += "• " + player.name + (player.sessionId == displayedLobby.hostSessionId ? "  ♛" : "") + "\n";
             }
             roster.text = lines;
-            startButton.gameObject.SetActive(roomClient.SessionId == roomClient.Lobby.hostSessionId && roomClient.Lobby.players.Count >= 2);
+            startButton.gameObject.SetActive(roomClient.SessionId == displayedLobby.hostSessionId && displayedLobby.players.Count >= 2);
         }
 
         private void SetBusy(string message, bool busy)
