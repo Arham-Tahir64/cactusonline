@@ -132,7 +132,10 @@ export class CactusRoom extends Room {
           playerId: client.sessionId,
           target: msg.target,
           outcome: result.outcome,
-          card: result.outcome === 'window-closed' ? null : result.card,
+          card:
+            result.outcome === 'window-closed' || result.outcome === 'duplicate-attempt'
+              ? null
+              : result.card,
         });
       }),
     );
@@ -175,7 +178,11 @@ export class CactusRoom extends Room {
     // Mid-game: hold the seat and allow rejoining within the grace period.
     this.engine.setConnected(client.sessionId, false);
     this.broadcastViews();
-    if (consented) return; // explicit leave: seat stays held, but don't wait
+    if (consented) {
+      // An explicit departure must not strand rematch authority on an absent host.
+      this.transferHostFrom(client.sessionId);
+      return; // seat stays held, but don't wait
+    }
     try {
       await this.allowReconnection(client, RECONNECT_GRACE_SECONDS);
       this.engine.setConnected(client.sessionId, true);
@@ -183,6 +190,7 @@ export class CactusRoom extends Room {
       if (this.engine.phase === 'reveal') client.send('scores', this.engine.getScores());
     } catch {
       // Grace period expired; seat remains marked disconnected.
+      this.transferHostFrom(client.sessionId);
     }
   }
 
@@ -242,8 +250,16 @@ export class CactusRoom extends Room {
     if (!this.engine || this.engine.phase !== 'reveal') {
       throw new GameError('wrong-phase', 'A rematch can only start from the results screen.');
     }
+    const connectedIds = new Set(
+      this.engine.getState().players.filter((player) => player.isConnected).map((player) => player.id),
+    );
+    const nextLobby = this.lobby.filter((player) => connectedIds.has(player.sessionId));
+    if (nextLobby.length < 2) {
+      throw new GameError('not-enough-players', 'Need at least 2 connected players for a rematch.');
+    }
     this.engine.endGame();
     this.engine = null;
+    this.lobby = nextLobby;
     this.broadcast('event', { type: 'rematch' });
     this.startGame(client); // fresh shuffle, same lobby
   }
@@ -309,6 +325,17 @@ export class CactusRoom extends Room {
       })),
       hostSessionId: this.hostSessionId,
     });
+  }
+
+  private transferHostFrom(sessionId: string) {
+    if (this.hostSessionId !== sessionId) return;
+    this.hostSessionId =
+      this.lobby.find(
+        (player) =>
+          player.sessionId !== sessionId &&
+          (!this.engine || this.engine.getPlayer(player.sessionId).isConnected),
+      )?.sessionId ?? '';
+    this.broadcastLobby();
   }
 
   private sendRevealed(client: Client, target: BoardTarget, card: Card) {

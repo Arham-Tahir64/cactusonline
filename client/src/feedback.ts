@@ -22,6 +22,7 @@ export function cueForGameEvent(event: GameEvent): SoundCue | null {
     case 'cactus-called':
       return 'cactus';
     case 'match-attempt':
+      if (event.outcome === 'window-closed' || event.outcome === 'duplicate-attempt') return null;
       return event.outcome === 'correct-own' || event.outcome === 'correct-opponent'
         ? 'stack-success'
         : 'stack-failure';

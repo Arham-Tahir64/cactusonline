@@ -8,6 +8,7 @@ describe('game feedback mapping', () => {
     expect(cueForGameEvent({ type: 'cactus-called' })).toBe('cactus');
     expect(cueForGameEvent({ type: 'match-attempt', outcome: 'correct-own' })).toBe('stack-success');
     expect(cueForGameEvent({ type: 'match-attempt', outcome: 'incorrect' })).toBe('stack-failure');
+    expect(cueForGameEvent({ type: 'match-attempt', outcome: 'duplicate-attempt' })).toBeNull();
     expect(cueForGameEvent({ type: 'match-window-closed' })).toBeNull();
   });
 

@@ -55,6 +55,8 @@ export class CactusGame {
   private state: EngineState;
   private readonly rng: Rng;
   private slotCounter = 0;
+  /** Idempotency guard for accidental duplicate Stack messages in one discard window. */
+  private readonly matchAttempts = new Set<string>();
 
   constructor(players: { id: string; name: string; avatarId?: AvatarId }[], options: GameOptions = {}) {
     if (players.length < 2 || players.length > 8) {
@@ -172,7 +174,9 @@ export class CactusGame {
             type: s.pendingAction.type,
             actingPlayerId: s.pendingAction.actingPlayerId,
             stage: s.pendingAction.stage,
-            qLookTarget: s.pendingAction.qLookTarget,
+            // The Queen's inspected position is private strategic information.
+            qLookTarget:
+              s.pendingAction.actingPlayerId === playerId ? s.pendingAction.qLookTarget : null,
           }
         : null,
       pendingGive: s.pendingGive ? { ...s.pendingGive } : null,
@@ -378,6 +382,9 @@ export class CactusGame {
     }
     const slot = victim.board[slotIndex]!;
     const card = slot.card;
+    const attemptKey = `${window.discardEventId}:${playerId}:${target.playerId}:${target.slotId}`;
+    if (this.matchAttempts.has(attemptKey)) return { outcome: 'duplicate-attempt' };
+    this.matchAttempts.add(attemptKey);
 
     if (card.rank === window.rank) {
       // Correct: card leaves its board and lands face-up on the discard pile.
@@ -526,6 +533,7 @@ export class CactusGame {
   private discardCard(card: Card): void {
     this.state.discardPile.push(card);
     this.state.discardEventCounter++;
+    this.matchAttempts.clear();
     this.state.matchWindow = {
       open: true,
       discardEventId: `discard-${this.state.discardEventCounter}`,

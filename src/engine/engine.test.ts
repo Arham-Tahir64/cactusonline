@@ -72,6 +72,14 @@ describe('setup & peek phase', () => {
 
   it('rejects invalid player counts', () => {
     expect(() => new CactusGame([{ id: 'p1', name: 'solo' }])).toThrow(GameError);
+    expect(() => new CactusGame(Array.from({ length: 9 }, (_, i) => ({ id: `p${i}`, name: `P${i}` })))).toThrow(
+      GameError,
+    );
+    for (let count = 2; count <= 8; count++) {
+      expect(
+        () => new CactusGame(Array.from({ length: count }, (_, i) => ({ id: `p${i}`, name: `P${i}` }))),
+      ).not.toThrow();
+    }
   });
 });
 
@@ -271,6 +279,18 @@ describe('match window (losing-cards rule)', () => {
     expect(game.getState().matchWindow?.open).toBe(true);
   });
 
+  it('treats an exact duplicate failed stack message as idempotent', () => {
+    const game = basicGame([c('5', 'H'), c('9', 'D'), c('10', 'D')]);
+    game.drawFromDeck('p1');
+    game.discardDrawnCard('p1');
+    const target = { playerId: 'p1', slotId: slotId(game, 'p1', 0) };
+
+    expect(game.attemptMatch('p2', target).outcome).toBe('incorrect');
+    expect(game.getPlayer('p2').board).toHaveLength(5);
+    expect(game.attemptMatch('p2', target).outcome).toBe('duplicate-attempt');
+    expect(game.getPlayer('p2').board).toHaveLength(5);
+  });
+
   it('penalty draw reshuffles the discard pile if the draw pile is empty', () => {
     const game = basicGame([c('5', 'H')]); // draw pile empty after p1's draw
     game.drawFromDeck('p1');
@@ -338,6 +358,22 @@ describe('match window (losing-cards rule)', () => {
 });
 
 describe('cactus & game end', () => {
+  it.each([2, 4, 6, 8])('completes a final round with %i players', (count) => {
+    const players = Array.from({ length: count }, (_, i) => ({ id: `p${i}`, name: `P${i}` }));
+    const game = new CactusGame(players, { seed: 700 + count });
+    game.startPlaying();
+    game.callCactus('p0');
+    for (let i = 1; i < count; i++) {
+      expect(game.currentPlayerId).toBe(`p${i}`);
+      game.drawFromDeck(`p${i}`);
+      game.discardDrawnCard(`p${i}`);
+    }
+    expect(game.phase).toBe('final-round');
+    game.closeMatchWindow();
+    expect(game.phase).toBe('reveal');
+    expect(Object.keys(game.getScores().totals)).toHaveLength(count);
+  });
+
   it('full cactus flow: others get one turn, then reveal and scores', () => {
     const game = new CactusGame(
       [
@@ -498,5 +534,16 @@ describe('redacted player views', () => {
     expect(view.peekCards).toHaveLength(2);
     game.startPlaying();
     expect(game.getPlayerView('p1').peekCards).toBeNull();
+  });
+
+  it('keeps a Queen look target private to the acting player', () => {
+    const game = basicGame([c('Q', 'H')]);
+    game.drawFromDeck('p1');
+    game.playDrawnActionCard('p1');
+    const target = { playerId: 'p2', slotId: slotId(game, 'p2', 0) };
+    game.resolveQueenLook('p1', target);
+
+    expect(game.getPlayerView('p1').pendingAction?.qLookTarget).toEqual(target);
+    expect(game.getPlayerView('p2').pendingAction?.qLookTarget).toBeNull();
   });
 });

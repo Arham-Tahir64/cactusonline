@@ -104,6 +104,7 @@ export type MatchResult =
   | { outcome: 'correct-own'; card: Card }
   | { outcome: 'correct-opponent'; card: Card; mustGiveTo: string }
   | { outcome: 'incorrect'; card: Card } // card stays put; attempter draws a face-down penalty card
+  | { outcome: 'duplicate-attempt' }
   | { outcome: 'window-closed' };
 
 // ---------------------------------------------------------------------------

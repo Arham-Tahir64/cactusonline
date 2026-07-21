@@ -13,7 +13,8 @@ describe('table seating', () => {
     expect(ordered[0]).toBe(local);
     expect(seats).toHaveLength(count);
     expect(seats[0]?.left).toBe(50);
-    expect(seats[0]?.top).toBeGreaterThanOrEqual(84);
+    expect(seats[0]?.top).toBeGreaterThanOrEqual(74);
+    expect(seats[0]?.top).toBeLessThanOrEqual(88);
   });
 
   it('preserves clockwise room order while wrapping around the local player', () => {

@@ -467,7 +467,7 @@ button:focus-visible {
   position: absolute;
   z-index: 20;
   top: 112px;
-  left: 50%;
+  left: 64%;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -604,14 +604,14 @@ button:focus-visible {
 .table-circle {
   position: absolute;
   z-index: 5;
-  top: 55%;
+  top: 57%;
   left: 50%;
-  width: min(94vw, 2100px);
-  height: min(78vh, 900px);
+  width: min(94vw, 160vh, 2400px);
+  height: min(82vh, 1100px);
   min-height: 520px;
   transform: translate(-50%, -50%);
   border: clamp(12px, 1.4vw, 22px) solid #4a2a1a;
-  border-radius: 48% 48% 43% 43% / 46% 46% 40% 40%;
+  border-radius: 46% 46% 42% 42% / 47% 47% 40% 40%;
   background:
     radial-gradient(ellipse at 50% 48%, rgba(126, 148, 65, 0.22), transparent 48%),
     radial-gradient(ellipse at 50% 100%, rgba(12, 25, 14, 0.56), transparent 38%),
@@ -644,7 +644,7 @@ button:focus-visible {
 .table-center {
   position: absolute;
   z-index: 3;
-  top: 47%;
+  top: 37%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
@@ -660,13 +660,32 @@ button:focus-visible {
   z-index: 8;
 }
 
-.table-circle[data-player-count='2'] .seat {
-  --seat-scale: 1.12;
+.table-circle[data-player-count='2'] .player-board {
+  --seat-scale: 0.86;
 }
 
-.table-circle[data-player-count='7'] .seat,
-.table-circle[data-player-count='8'] .seat {
+.table-circle[data-player-count='2'] .player-board.me {
+  --seat-scale: 1.14;
+}
+
+.table-circle[data-player-count='5'] .player-board,
+.table-circle[data-player-count='6'] .player-board {
+  --seat-scale: 0.92;
+}
+
+.table-circle[data-player-count='5'] .player-board.me,
+.table-circle[data-player-count='6'] .player-board.me {
+  --seat-scale: 1;
+}
+
+.table-circle[data-player-count='7'] .player-board,
+.table-circle[data-player-count='8'] .player-board {
   --seat-scale: 0.78;
+}
+
+.table-circle[data-player-count='7'] .player-board.me,
+.table-circle[data-player-count='8'] .player-board.me {
+  --seat-scale: 0.84;
 }
 
 .player-board {
@@ -733,10 +752,10 @@ button:focus-visible {
 }
 
 .player-board.me .seat-avatar {
-  top: 31px;
-  left: -44px;
-  width: 144px;
-  height: 144px;
+  top: 10px;
+  left: -90px;
+  width: 214px;
+  height: 214px;
 }
 
 /* Character cutouts occupy the chairs outside the rail while their cards stay
@@ -792,13 +811,10 @@ button:focus-visible {
   margin-bottom: 0;
 }
 
-.game-stage[data-player-count='3'] .player-board.me .player-nameplate,
-.game-stage[data-player-count='4'] .player-board.me .player-nameplate,
-.game-stage[data-player-count='5'] .player-board.me .player-nameplate,
-.game-stage[data-player-count='6'] .player-board.me .player-nameplate {
+.game-stage[data-player-count] .player-board.me .player-nameplate {
   position: absolute;
-  top: 190px;
-  left: -100px;
+  top: 198px;
+  left: -150px;
   margin: 0;
 }
 
@@ -849,7 +865,7 @@ button:focus-visible {
   z-index: 2;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 7px;
+  gap: clamp(6px, 0.55vw, 9px);
   justify-content: center;
   padding: 6px;
   border-radius: 13px;
@@ -938,11 +954,11 @@ button:focus-visible {
 }
 
 .playing-card.size-sm {
-  width: clamp(3.35rem, 5.2vw, 5rem);
+  width: clamp(3.5rem, 5.15vw, 5.15rem);
 }
 
 .playing-card.size-md {
-  width: clamp(4.05rem, 5.2vw, 5.4rem);
+  width: clamp(4.7rem, 5.7vw, 6.4rem);
 }
 
 .playing-card.size-lg {
@@ -1068,7 +1084,7 @@ button:focus-visible {
 
 .center-pile {
   display: flex;
-  gap: 1.35rem;
+  gap: clamp(1.15rem, 1.5vw, 1.8rem);
   align-items: flex-start;
 }
 
@@ -1150,8 +1166,8 @@ button:focus-visible {
   position: absolute;
   z-index: 18;
   left: 50%;
-  bottom: clamp(280px, 41vh, 330px);
-  width: min(56vw, 610px);
+  bottom: clamp(270px, 39vh, 420px);
+  width: min(48vw, 660px);
   transform: translateX(-50%);
   box-shadow: none;
 }
@@ -1176,7 +1192,7 @@ button:focus-visible {
 
 .turn-actions > button:not(.stack-action) {
   flex: 1 1 0;
-  min-height: 54px;
+  min-height: clamp(50px, 6.5vh, 60px);
   border-width: 2px;
   border-radius: 999px;
   font-weight: 800;
@@ -1275,10 +1291,11 @@ button:focus-visible {
 .turn-guide {
   position: absolute;
   z-index: 19;
-  right: 22px;
-  bottom: 42px;
-  width: min(292px, 23vw);
-  padding: 17px;
+  right: clamp(18px, 2vw, 34px);
+  bottom: clamp(24px, 4.5vh, 54px);
+  width: min(370px, 22vw);
+  min-height: 350px;
+  padding: clamp(18px, 1.5vw, 23px);
   border: 1px solid rgba(240, 207, 159, 0.38);
   border-radius: 14px;
   color: #d8c9b1;
@@ -1298,21 +1315,21 @@ button:focus-visible {
 
 .turn-guide-kicker {
   color: #f2bc57;
-  font: 800 1.03rem Georgia, serif;
+  font: 800 1.18rem Georgia, serif;
 }
 
 .turn-guide header strong {
   color: #ded3c1;
-  font-size: .76rem;
+  font-size: .84rem;
   font-weight: 500;
 }
 
 .guide-step {
   display: grid;
-  grid-template-columns: 38px 1fr;
-  gap: 10px;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
   align-items: center;
-  padding: 7px 0;
+  padding: 11px 0;
   opacity: .62;
 }
 
@@ -1328,17 +1345,17 @@ button:focus-visible {
 
 .guide-step strong {
   color: #e7bb63;
-  font-size: .78rem;
+  font-size: .86rem;
 }
 
 .guide-step span:last-child {
-  font-size: .66rem;
+  font-size: .72rem;
   line-height: 1.35;
 }
 
 .guide-icon {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
   color: #9ebf68;
@@ -1374,9 +1391,9 @@ button:focus-visible {
 .event-log {
   position: absolute;
   z-index: 17;
-  left: 16px;
-  bottom: 16px;
-  width: min(280px, 23vw);
+  left: clamp(14px, 1.6vw, 28px);
+  bottom: clamp(14px, 2.5vh, 28px);
+  width: min(270px, 20vw);
   max-height: 6.5rem;
   overflow-y: auto;
   font-size: 0.72rem;
@@ -1407,7 +1424,7 @@ button:focus-visible {
 
   .game-screen .turn-banner {
     top: 116px;
-    left: 73%;
+    left: 66%;
   }
 
   .game-screen[data-phase='peek'] .turn-banner {

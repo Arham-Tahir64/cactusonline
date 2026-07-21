@@ -54,7 +54,7 @@ function tryStacks(): void {
         if (mem.get(slot.slotId) !== window.rank) continue;
         const target: BoardTarget = { playerId: victim.id, slotId: slot.slotId };
         const result = game.attemptMatch(bot.id, target);
-        if (result.outcome === 'window-closed') return;
+        if (result.outcome === 'window-closed' || result.outcome === 'duplicate-attempt') return;
         console.log(
           `  ⚡ ${nameOf(bot.id)} stacks ${label(result.card)} from ${nameOf(victim.id)}'s board (${result.outcome})`,
         );
