@@ -1,7 +1,10 @@
 {
   "name": "Cactus.Tests.EditMode",
   "rootNamespace": "Cactus.Tests",
-  "references": [],
+  "references": [
+    "Cactus.Client",
+    "ColyseusSDK"
+  ],
   "includePlatforms": [
     "Editor"
   ],
