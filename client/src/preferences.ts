@@ -1,25 +1,32 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import {
+  DEFAULT_PREFERENCES,
+  clampVolume,
+  migratePreferences,
+  type StoredPreferences,
+} from './preferenceModel';
 
-interface PreferencesState {
-  muted: boolean;
-  volume: number;
-  reducedMotion: boolean;
+interface PreferencesState extends StoredPreferences {
   setMuted(muted: boolean): void;
-  setVolume(volume: number): void;
+  setMasterVolume(volume: number): void;
+  setEffectsVolume(volume: number): void;
   setReducedMotion(reducedMotion: boolean): void;
 }
 
 export const usePreferences = create<PreferencesState>()(
   persist(
     (set) => ({
-      muted: false,
-      volume: 0.72,
-      reducedMotion: false,
+      ...DEFAULT_PREFERENCES,
       setMuted: (muted) => set({ muted }),
-      setVolume: (volume) => set({ volume: Math.max(0, Math.min(1, volume)) }),
+      setMasterVolume: (masterVolume) => set({ masterVolume: clampVolume(masterVolume) }),
+      setEffectsVolume: (effectsVolume) => set({ effectsVolume: clampVolume(effectsVolume) }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
     }),
-    { name: 'cactus-preferences', version: 1 },
+    {
+      name: 'cactus-preferences',
+      version: 2,
+      migrate: (persisted, version) => migratePreferences(persisted, version),
+    },
   ),
 );

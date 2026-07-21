@@ -7,10 +7,12 @@ export default function GameHeader() {
   const view = useCactusStore((state) => state.view);
   const leave = useCactusStore((state) => state.leave);
   const muted = usePreferences((state) => state.muted);
-  const volume = usePreferences((state) => state.volume);
+  const masterVolume = usePreferences((state) => state.masterVolume);
+  const effectsVolume = usePreferences((state) => state.effectsVolume);
   const reducedMotion = usePreferences((state) => state.reducedMotion);
   const setMuted = usePreferences((state) => state.setMuted);
-  const setVolume = usePreferences((state) => state.setVolume);
+  const setMasterVolume = usePreferences((state) => state.setMasterVolume);
+  const setEffectsVolume = usePreferences((state) => state.setEffectsVolume);
   const setReducedMotion = usePreferences((state) => state.setReducedMotion);
   const [helpOpen, setHelpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -88,8 +90,12 @@ export default function GameHeader() {
               <input type="checkbox" checked={!muted} onChange={(event) => setMuted(!event.target.checked)} />
             </label>
             <label className="setting-row volume-row">
-              <span>Volume</span>
-              <input type="range" min="0" max="1" step="0.05" value={volume} disabled={muted} onChange={(event) => setVolume(Number(event.target.value))} />
+              <span>Master volume</span>
+              <input type="range" min="0" max="1" step="0.05" value={masterVolume} disabled={muted} onChange={(event) => setMasterVolume(Number(event.target.value))} />
+            </label>
+            <label className="setting-row volume-row">
+              <span>Effects volume</span>
+              <input type="range" min="0" max="1" step="0.05" value={effectsVolume} disabled={muted} onChange={(event) => setEffectsVolume(Number(event.target.value))} />
             </label>
             <label className="setting-row">
               <span>Reduce motion</span>

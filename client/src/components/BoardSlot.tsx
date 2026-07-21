@@ -29,6 +29,7 @@ export default function BoardSlot({ playerId, slot }: Props) {
       className={['board-slot', valid ? 'selectable' : '', isChosenFirst ? 'chosen' : '']
         .filter(Boolean)
         .join(' ')}
+      data-slot-id={slot.slotId}
       disabled={!valid}
       onClick={() => handleSlotClick(playerId, slot.slotId)}
       title={mine ? 'your card' : 'opponent card'}

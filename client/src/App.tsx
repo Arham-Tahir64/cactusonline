@@ -2,12 +2,14 @@ import { useCactusStore } from './store';
 import JoinScreen from './components/JoinScreen';
 import LobbyScreen from './components/LobbyScreen';
 import GameScreen from './components/GameScreen';
+import { usePreferences } from './preferences';
 
 export default function App() {
   const screen = useCactusStore((s) => s.screen);
+  const reducedMotion = usePreferences((s) => s.reducedMotion);
 
   return (
-    <div className="app" data-screen={screen}>
+    <div className="app" data-screen={screen} data-reduced-motion={reducedMotion}>
       {screen !== 'game' && (
         <header className="landing-brand" aria-label="Cactus">
           <span className="brand-cactus" aria-hidden="true">🌵</span>

@@ -7,8 +7,10 @@ import Scoreboard from './Scoreboard';
 import EventLog from './EventLog';
 import GameHeader from './GameHeader';
 import TurnGuide from './TurnGuide';
+import { useGameFeedback } from '../useGameFeedback';
 
 export default function GameScreen() {
+  useGameFeedback();
   const view = useCactusStore((s) => s.view);
   const room = useCactusStore((s) => s.room);
   const clickMode = useCactusStore((s) => s.clickMode);
