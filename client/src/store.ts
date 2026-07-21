@@ -2,6 +2,11 @@ import { create } from 'zustand';
 import type { Room } from 'colyseus.js';
 import { client } from './colyseusClient';
 import type { AvatarId, BoardTarget, Card, RoomView, Scores } from '@engine/types';
+import {
+  clearReconnectSession,
+  readReconnectSession,
+  saveReconnectSession,
+} from './reconnectSession';
 
 export type ClickMode =
   | null
@@ -43,10 +48,12 @@ interface CactusState {
   jackFirst: BoardTarget | null;
   prompt: string;
   connecting: boolean;
+  restoring: boolean;
   lastError: string | null;
 
   createGame(name: string, avatarId?: AvatarId): Promise<void>;
   joinGame(code: string, name: string, avatarId?: AvatarId): Promise<void>;
+  restoreGame(): Promise<void>;
   leave(): void;
   send(type: string, payload?: unknown): void;
   setClickMode(mode: ClickMode, prompt?: string): void;
@@ -68,7 +75,8 @@ function wireRoom(
     if (msg.peekCards) {
       for (const p of msg.peekCards) known[p.slotId] = p.card;
     }
-    set({ view: msg, screen: 'game', known });
+    saveReconnectSession(room.reconnectionToken);
+    set({ view: msg, screen: 'game', known, restoring: false });
   });
 
   room.onMessage('revealed', (msg: { target: BoardTarget; card: Card }) => {
@@ -101,6 +109,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
   jackFirst: null,
   prompt: '',
   connecting: false,
+  restoring: false,
   lastError: null,
 
   async createGame(name, avatarId = 'ranger') {
@@ -129,7 +138,29 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     }
   },
 
+  async restoreGame() {
+    if (get().room || get().restoring) return;
+    const saved = readReconnectSession();
+    if (!saved) return;
+    set({ restoring: true, connecting: true, lastError: null });
+    try {
+      const room = await client.reconnect(saved.token);
+      wireRoom(room, set, get);
+      saveReconnectSession(room.reconnectionToken);
+      set({ room, screen: 'game' });
+    } catch {
+      clearReconnectSession();
+      set({
+        restoring: false,
+        lastError: 'Your previous table could not be restored. You can create or join another table.',
+      });
+    } finally {
+      set({ connecting: false });
+    }
+  },
+
   leave() {
+    clearReconnectSession();
     get().room?.leave();
     set({
       screen: 'join',
@@ -142,6 +173,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
       clickMode: null,
       jackFirst: null,
       prompt: '',
+      restoring: false,
     });
   },
 

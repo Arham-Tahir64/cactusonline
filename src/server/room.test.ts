@@ -248,4 +248,32 @@ describe('disconnection', () => {
     const bobSeat = aliceInbox.view().players.find((p) => p.id === bob.sessionId)!;
     expect(bobSeat.board.length).toBe(4); // seat and board are held
   });
+
+  it('reconnects the same held seat with a fresh redacted view', async () => {
+    const { alice, bob, aliceInbox, bobInbox } = await twoPlayerRoom();
+    alice.send('start');
+    await until(() => bobInbox.views.length > 0 && bobInbox.view().phase === 'playing', 'playing phase');
+
+    const originalSessionId = bob.sessionId;
+    const reconnectionToken = bob.reconnectionToken;
+    await bob.leave(false);
+    await until(
+      () => aliceInbox.view().players.find((player) => player.id === originalSessionId)?.isConnected === false,
+      'held disconnected seat',
+    );
+
+    const reconnected = await server.sdk.reconnect(reconnectionToken);
+    const reconnectedInbox = collect(reconnected);
+    await until(
+      () => aliceInbox.view().players.find((player) => player.id === originalSessionId)?.isConnected === true,
+      'seat reconnection',
+    );
+    await until(() => reconnectedInbox.views.length > 0, 'reconnected private view');
+
+    expect(reconnected.sessionId).toBe(originalSessionId);
+    expect(reconnectedInbox.view().peekCards).toBeNull();
+    for (const player of reconnectedInbox.view().players) {
+      for (const slot of player.board) expect(slot.card).toBeNull();
+    }
+  });
 });

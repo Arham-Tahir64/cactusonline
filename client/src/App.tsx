@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useCactusStore } from './store';
 import JoinScreen from './components/JoinScreen';
 import LobbyScreen from './components/LobbyScreen';
@@ -6,7 +7,13 @@ import { usePreferences } from './preferences';
 
 export default function App() {
   const screen = useCactusStore((s) => s.screen);
+  const restoring = useCactusStore((s) => s.restoring);
+  const restoreGame = useCactusStore((s) => s.restoreGame);
   const reducedMotion = usePreferences((s) => s.reducedMotion);
+
+  useEffect(() => {
+    void restoreGame();
+  }, [restoreGame]);
 
   return (
     <div className="app" data-screen={screen} data-reduced-motion={reducedMotion}>
@@ -18,9 +25,19 @@ export default function App() {
           <p>Cards, memory &amp; a little desert mischief</p>
         </header>
       )}
-      {screen === 'join' && <JoinScreen />}
-      {screen === 'lobby' && <LobbyScreen />}
-      {screen === 'game' && <GameScreen />}
+      {restoring ? (
+        <section className="panel reconnecting-panel" aria-live="polite">
+          <div className="panel-kicker">Returning to the table</div>
+          <h2>Restoring your seat…</h2>
+          <p className="panel-intro">Reconnecting securely and requesting a fresh hidden-card view.</p>
+        </section>
+      ) : (
+        <>
+          {screen === 'join' && <JoinScreen />}
+          {screen === 'lobby' && <LobbyScreen />}
+          {screen === 'game' && <GameScreen />}
+        </>
+      )}
     </div>
   );
 }

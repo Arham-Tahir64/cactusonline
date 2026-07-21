@@ -28,11 +28,19 @@ export default function Table() {
       </div>
       {seated.map((player, i) => {
         const position = layout[i]!;
+        const zone = i === 0
+          ? 'south'
+          : position.top <= 20
+            ? 'north'
+            : position.left < 50
+              ? 'west'
+              : 'east';
         return (
           <div
             key={player.id}
             className={`seat ${player.id === me ? 'local-seat' : 'opponent-seat'}`}
             data-seat-index={i}
+            data-seat-zone={zone}
             style={{ left: `${position.left}%`, top: `${position.top}%` }}
           >
             <PlayerBoard player={player} isMe={player.id === me} />

@@ -53,13 +53,6 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
           >
             <span aria-hidden="true">🌵</span> Call Cactus
           </button>
-          <button
-            className="stack-action"
-            disabled={!view.matchWindowOpen}
-            onClick={() => setClickMode('stack', 'STACK: click any card you think matches the discard')}
-          >
-            Stack!
-          </button>
         </div>
       )}
 

@@ -180,6 +180,7 @@ export class CactusRoom extends Room {
       await this.allowReconnection(client, RECONNECT_GRACE_SECONDS);
       this.engine.setConnected(client.sessionId, true);
       this.broadcastViews();
+      if (this.engine.phase === 'reveal') client.send('scores', this.engine.getScores());
     } catch {
       // Grace period expired; seat remains marked disconnected.
     }
