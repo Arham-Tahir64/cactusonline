@@ -18,7 +18,7 @@ export default function PlayerBoard({ player, isMe }: Props) {
       style={{ '--avatar-accent': avatar.accent } as React.CSSProperties}
     >
       <div className="seat-avatar" aria-hidden="true">
-        <span>{avatar.glyph}</span>
+        <img src={avatar.portrait} alt="" />
       </div>
       <div className="player-nameplate">
         <span className="player-status-mark" aria-hidden="true">{isMe ? '♛' : '✦'}</span>

@@ -209,6 +209,19 @@ button:focus-visible {
   border-radius: 50%;
   font-size: clamp(1.15rem, 3vw, 1.75rem);
   background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--avatar-accent) 42%, #40372c), #16130f 72%);
+  overflow: hidden;
+}
+
+.avatar-choice img,
+.lobby-avatar img,
+.seat-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform: scale(1.16) translateY(7%);
+  transform-origin: 50% 28%;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
 }
 
 .avatar-choice.selected {
@@ -308,6 +321,7 @@ button:focus-visible {
   font-size: 1.5rem;
   background: color-mix(in srgb, var(--avatar-accent) 35%, #211b15);
   border: 2px solid var(--avatar-accent);
+  overflow: hidden;
 }
 
 .lobby-player-name {
@@ -699,12 +713,6 @@ button:focus-visible {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--avatar-accent) 70%, #3e2815), 0 8px 16px #000;
 }
 
-.seat-avatar span {
-  display: block;
-  font-size: 3.65rem;
-  transform: translateY(8px);
-}
-
 .player-board.me .seat-avatar {
   top: 38px;
   left: -30px;
@@ -712,8 +720,8 @@ button:focus-visible {
   height: 104px;
 }
 
-.player-board.me .seat-avatar span {
-  font-size: 4.4rem;
+.player-board.me .seat-avatar img {
+  transform: scale(1.12) translateY(8%);
 }
 
 .player-nameplate {

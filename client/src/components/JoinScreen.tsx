@@ -29,7 +29,7 @@ export default function JoinScreen() {
             aria-label={avatar.name}
             onClick={() => setAvatarId(avatar.id)}
           >
-            <span aria-hidden="true">{avatar.glyph}</span>
+            <img src={avatar.portrait} alt="" aria-hidden="true" />
           </button>
         ))}
       </div>

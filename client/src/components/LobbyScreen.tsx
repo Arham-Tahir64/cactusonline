@@ -27,7 +27,7 @@ export default function LobbyScreen() {
         {lobby.players.map((p) => (
           <li key={p.sessionId}>
             <span className="lobby-avatar" style={{ '--avatar-accent': avatarById(p.avatarId).accent } as React.CSSProperties}>
-              {avatarById(p.avatarId).glyph}
+              <img src={avatarById(p.avatarId).portrait} alt="" aria-hidden="true" />
             </span>
             <span className="lobby-player-name">
               <strong>{p.name}</strong>
