@@ -1,22 +1,41 @@
-import { useEffect } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { useCactusStore } from './store';
 import JoinScreen from './components/JoinScreen';
 import LobbyScreen from './components/LobbyScreen';
 import GameScreen from './components/GameScreen';
 import { usePreferences } from './preferences';
+import ResolutionSelector from './components/ResolutionSelector';
+import { resolutionLayout } from './preferenceModel';
 
 export default function App() {
   const screen = useCactusStore((s) => s.screen);
   const restoring = useCactusStore((s) => s.restoring);
   const restoreGame = useCactusStore((s) => s.restoreGame);
   const reducedMotion = usePreferences((s) => s.reducedMotion);
+  const resolution = usePreferences((s) => s.resolution);
+  const resolutionConfigured = Boolean(resolution);
+  const layout = resolution ? resolutionLayout(resolution) : null;
 
   useEffect(() => {
-    void restoreGame();
-  }, [restoreGame]);
+    if (resolutionConfigured) void restoreGame();
+  }, [restoreGame, resolutionConfigured]);
+
+  if (!resolution || !layout) {
+    return <div className="app resolution-setup"><ResolutionSelector firstLaunch /></div>;
+  }
 
   return (
-    <div className="app" data-screen={screen} data-reduced-motion={reducedMotion}>
+    <div
+      className="app"
+      data-screen={screen}
+      data-reduced-motion={reducedMotion}
+      data-resolution-tier={layout.tier}
+      data-resolution-aspect={layout.aspect}
+      style={{
+        '--resolution-ui-scale': layout.uiScale,
+        '--resolution-perspective-scale': layout.perspectiveScale,
+      } as CSSProperties}
+    >
       {screen !== 'game' && (
         <header className="landing-brand" aria-label="Cactus">
           <span className="brand-cactus" aria-hidden="true">🌵</span>

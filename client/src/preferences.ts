@@ -5,6 +5,7 @@ import {
   clampVolume,
   migratePreferences,
   type StoredPreferences,
+  type ResolutionSelection,
 } from './preferenceModel';
 
 interface PreferencesState extends StoredPreferences {
@@ -12,6 +13,7 @@ interface PreferencesState extends StoredPreferences {
   setMasterVolume(volume: number): void;
   setEffectsVolume(volume: number): void;
   setReducedMotion(reducedMotion: boolean): void;
+  setResolution(resolution: ResolutionSelection): void;
 }
 
 export const usePreferences = create<PreferencesState>()(
@@ -22,10 +24,11 @@ export const usePreferences = create<PreferencesState>()(
       setMasterVolume: (masterVolume) => set({ masterVolume: clampVolume(masterVolume) }),
       setEffectsVolume: (effectsVolume) => set({ effectsVolume: clampVolume(effectsVolume) }),
       setReducedMotion: (reducedMotion) => set({ reducedMotion }),
+      setResolution: (resolution) => set({ resolution }),
     }),
     {
       name: 'cactus-preferences',
-      version: 2,
+      version: 3,
       migrate: (persisted, version) => migratePreferences(persisted, version),
     },
   ),

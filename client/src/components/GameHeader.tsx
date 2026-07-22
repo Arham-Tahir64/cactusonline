@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCactusStore } from '../store';
 import { usePreferences } from '../preferences';
+import ResolutionSelector from './ResolutionSelector';
 
 export default function GameHeader() {
   const room = useCactusStore((state) => state.room);
@@ -17,6 +18,7 @@ export default function GameHeader() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [displayOpen, setDisplayOpen] = useState(false);
 
   if (!room || !view) return null;
 
@@ -101,7 +103,18 @@ export default function GameHeader() {
               <span>Reduce motion</span>
               <input type="checkbox" checked={reducedMotion} onChange={(event) => setReducedMotion(event.target.checked)} />
             </label>
+            <button className="display-settings-button" type="button" onClick={() => setDisplayOpen(true)}>
+              <span>Display profile</span><strong>Change resolution</strong>
+            </button>
           </section>
+        </div>
+      )}
+      {displayOpen && (
+        <div className="modal-scrim resolution-modal-scrim" role="presentation" onMouseDown={() => setDisplayOpen(false)}>
+          <div className="utility-modal resolution-modal" role="dialog" aria-modal="true" onMouseDown={(event) => event.stopPropagation()}>
+            <button className="modal-close" onClick={() => setDisplayOpen(false)} aria-label="Close display settings">×</button>
+            <ResolutionSelector onDone={() => { setDisplayOpen(false); setSettingsOpen(false); }} />
+          </div>
         </div>
       )}
     </>

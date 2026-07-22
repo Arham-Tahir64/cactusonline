@@ -54,6 +54,8 @@ input {
 }
 
 .app {
+  --resolution-ui-scale: 1;
+  --resolution-perspective-scale: 1;
   position: relative;
   z-index: 1;
   width: 100%;
@@ -68,9 +70,190 @@ input {
   gap: 1.25rem;
 }
 
+.resolution-setup {
+  min-height: 100vh;
+  padding: clamp(1rem, 4vh, 3.5rem) 1.25rem;
+  overflow: auto;
+}
+
+.resolution-selector {
+  width: min(100%, 840px);
+}
+
+.first-launch-resolution {
+  padding: clamp(1.4rem, 3vw, 2.6rem);
+  border: 1px solid rgba(242, 197, 102, 0.38);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 50% 0, rgba(219, 145, 45, 0.16), transparent 38%),
+    linear-gradient(145deg, rgba(39, 31, 22, 0.97), rgba(11, 10, 8, 0.98) 72%);
+  box-shadow: 0 32px 100px rgba(0, 0, 0, 0.72), inset 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.resolution-heading {
+  display: grid;
+  grid-template-columns: 1fr minmax(240px, 0.8fr);
+  gap: 2rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.resolution-heading h2 {
+  margin: 0.15rem 0 0;
+  color: #ffe2aa;
+  font: italic 800 clamp(2rem, 4vw, 3.2rem)/1 Georgia, serif;
+}
+
+.resolution-heading p {
+  margin: 0;
+  color: #bdae94;
+  line-height: 1.5;
+}
+
+.detected-resolution,
+.display-settings-button {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(117, 188, 60, 0.36);
+  border-radius: 13px;
+  background: rgba(45, 74, 31, 0.24);
+  color: #d9caaa;
+}
+
+.detected-resolution strong,
+.display-settings-button strong {
+  color: #a8d870;
+}
+
+.resolution-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+.resolution-grid button {
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0.9rem 1rem;
+  border-radius: 15px;
+  border: 1px solid rgba(239, 207, 160, 0.2);
+  background: linear-gradient(145deg, rgba(53, 45, 34, 0.78), rgba(17, 15, 12, 0.9));
+  color: #d5c5a9;
+  text-align: left;
+}
+
+.resolution-grid button:hover,
+.resolution-grid button.selected {
+  border-color: #d8932f;
+  box-shadow: 0 0 0 1px rgba(216, 147, 47, 0.34), 0 8px 24px rgba(0, 0, 0, 0.34);
+  transform: translateY(-1px);
+}
+
+.resolution-grid button.selected {
+  background: linear-gradient(145deg, rgba(92, 59, 25, 0.9), rgba(24, 18, 11, 0.95));
+}
+
+.resolution-grid button span {
+  color: #f2c566;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.resolution-grid button strong {
+  margin-top: 0.28rem;
+  color: #fff0d0;
+  font-size: 1.05rem;
+}
+
+.resolution-grid button small {
+  margin-top: 0.24rem;
+  color: #9f927d;
+}
+
+.custom-resolution {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 1rem auto 0;
+}
+
+.custom-resolution label {
+  display: grid;
+  gap: 0.35rem;
+  color: #c9b898;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.custom-resolution input {
+  width: 150px;
+  min-height: 44px;
+}
+
+.custom-resolution > span {
+  padding-bottom: 0.7rem;
+  color: #8e806d;
+}
+
+.resolution-error {
+  margin: 0.6rem 0 0;
+  color: #f08c78;
+  text-align: center;
+}
+
+.resolution-apply {
+  width: min(100%, 360px);
+  margin: 1.15rem auto 0;
+  display: block;
+}
+
+.resolution-modal {
+  width: min(94vw, 900px);
+  max-height: min(92vh, 920px);
+  overflow: auto;
+}
+
+.resolution-modal .resolution-heading h2 {
+  font-size: 2.2rem;
+}
+
+.display-settings-button {
+  margin-top: 0.85rem;
+  cursor: pointer;
+}
+
 .app[data-screen='game'] {
   display: block;
   padding: 0;
+  background:
+    linear-gradient(rgba(8, 7, 6, 0.08), rgba(8, 7, 6, 0.28)),
+    url('./assets/desert-courtyard.png') center var(--resolution-scene-y, 50%) / cover no-repeat;
+}
+
+.app[data-screen='game'] .game-screen {
+  font-size: clamp(14px, calc(16px * var(--resolution-ui-scale)), 21px);
+}
+
+.app[data-resolution-aspect='ultrawide'] {
+  --resolution-scene-y: 44%;
+}
+
+.app[data-resolution-aspect='ultrawide'] .table-circle {
+  width: min(88vw, 178vh, 2840px);
+  height: min(83vh, 1260px);
 }
 
 .landing-brand {
@@ -638,8 +821,44 @@ button:focus-visible {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  perspective: 1450px;
+  perspective: calc(1450px * var(--resolution-perspective-scale));
   perspective-origin: 50% 42%;
+}
+
+.app[data-resolution-tier='large'] .table-circle {
+  top: 56.5%;
+  height: min(83vh, 1200px);
+}
+
+.app[data-resolution-tier='ultra'] .table-circle {
+  top: 56%;
+  width: min(95vw, 168vh, 3200px);
+  height: min(84vh, 1700px);
+  border-width: clamp(18px, 1.3vw, 34px);
+}
+
+.app[data-resolution-tier='large'] .game-hud,
+.app[data-resolution-tier='ultra'] .game-hud {
+  height: calc(94px * var(--resolution-ui-scale));
+  padding-inline: calc(22px * var(--resolution-ui-scale));
+}
+
+.app[data-resolution-tier='large'] .hud-icon,
+.app[data-resolution-tier='large'] .player-count,
+.app[data-resolution-tier='ultra'] .hud-icon,
+.app[data-resolution-tier='ultra'] .player-count {
+  min-height: calc(52px * var(--resolution-ui-scale));
+  height: calc(52px * var(--resolution-ui-scale));
+}
+
+.app[data-resolution-tier='large'] .hud-icon,
+.app[data-resolution-tier='ultra'] .hud-icon {
+  width: calc(52px * var(--resolution-ui-scale));
+}
+
+.app[data-resolution-tier='large'] .game-brand strong,
+.app[data-resolution-tier='ultra'] .game-brand strong {
+  font-size: calc(2.45rem * var(--resolution-ui-scale));
 }
 
 .table-circle {
@@ -1772,6 +1991,19 @@ button:focus-visible {
 /* Compact browser fallback: trade the oval seat geometry for a readable,
    scrollable table roster while keeping the local controls always reachable. */
 @media (max-width: 900px) {
+  .resolution-setup {
+    justify-content: flex-start;
+  }
+
+  .resolution-heading {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .resolution-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .game-screen {
     height: auto;
     min-height: 100dvh;
@@ -2001,6 +2233,18 @@ button:focus-visible {
 }
 
 @media (max-width: 420px) {
+  .first-launch-resolution {
+    padding: 1rem;
+  }
+
+  .resolution-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-resolution input {
+    width: 115px;
+  }
+
   .game-brand strong {
     font-size: 1.45rem;
   }

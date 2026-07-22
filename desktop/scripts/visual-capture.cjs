@@ -54,6 +54,27 @@ async function waitForRenderer(predicate, label, timeoutMs = 8_000) {
 
 async function joinRenderer(roomCode) {
   await window.loadURL(rendererUrl);
+  const preset = width === 1920 && height === 1080 ? 'fhd'
+    : width === 2560 && height === 1440 ? 'qhd'
+      : width === 3840 && height === 2160 ? 'uhd'
+        : width === 2560 && height === 1080 ? 'uwfhd'
+          : width === 3440 && height === 1440 ? 'uwqhd'
+            : 'custom';
+  await window.webContents.executeJavaScript(`localStorage.setItem('cactus-preferences', ${JSON.stringify(JSON.stringify({
+    state: {
+      muted: false,
+      masterVolume: 0.8,
+      effectsVolume: 0.9,
+      reducedMotion: true,
+      resolution: { preset, width, height },
+    },
+    version: 3,
+  }))})`);
+  await new Promise((resolve) => {
+    window.webContents.once('did-finish-load', resolve);
+    window.reload();
+  });
+  await waitForRenderer(`Boolean(document.querySelector('.join-screen')) && !document.querySelector('.resolution-selector')`, 'the saved display profile');
   await window.webContents.executeJavaScript(`(() => {
     const setInput = (selector, value) => {
       const input = document.querySelector(selector);
@@ -136,6 +157,9 @@ async function capture() {
     10_000,
   );
   await new Promise((resolve) => setTimeout(resolve, 450));
+  await window.webContents.executeJavaScript(`document.querySelector('[aria-label="Settings"]')?.click()`);
+  await waitForRenderer(`Boolean(document.querySelector('.display-settings-button'))`, 'display settings to remain available in-game');
+  await window.webContents.executeJavaScript(`document.querySelector('.settings-modal .modal-close')?.click()`);
 
   const evidence = await window.webContents.executeJavaScript(`(() => ({
     width: innerWidth,
@@ -144,6 +168,9 @@ async function capture() {
     boardCards: document.querySelectorAll('.board-grid .playing-card').length,
     exposedBoardCards: document.querySelectorAll('.board-grid .playing-card:not(.face-down)').length,
     phase: document.querySelector('.game-screen')?.dataset.phase ?? null,
+    resolutionTier: document.querySelector('.app')?.dataset.resolutionTier ?? null,
+    resolutionAspect: document.querySelector('.app')?.dataset.resolutionAspect ?? null,
+    displaySettingsAvailable: Boolean(document.querySelector('[aria-label="Settings"]')),
   }))()`);
   if (evidence.width !== width || evidence.height !== height) {
     throw new Error(`Electron content size was ${evidence.width}x${evidence.height}, expected ${width}x${height}.`);
