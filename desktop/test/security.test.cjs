@@ -8,6 +8,7 @@ const {
   normalizeSecureEndpoint,
   resolveRendererRequest,
 } = require('../dist/security.js');
+const { stripMetaContentSecurityPolicy } = require('../scripts/renderer-security.cjs');
 
 test('packaged endpoint accepts and normalizes only secure credential-free URLs', () => {
   assert.equal(normalizeSecureEndpoint(' wss://game.example.test/socket/ '), 'wss://game.example.test/socket');
@@ -36,6 +37,16 @@ test('CSP permits the configured HTTPS matchmaking and WebSocket origins', () =>
   assert.doesNotMatch(policy, /ws:\/\/localhost/);
   assert.match(policy, /object-src 'none'/);
   assert.match(policy, /frame-ancestors 'none'/);
+});
+
+test('packaged renderer removes the browser CSP that conflicts with its endpoint-specific header', () => {
+  const html = `<head>
+    <meta http-equiv="Content-Security-Policy" content="connect-src 'self' wss:">
+    <meta name="viewport" content="width=device-width">
+  </head>`;
+  const packagedHtml = stripMetaContentSecurityPolicy(html);
+  assert.doesNotMatch(packagedHtml, /Content-Security-Policy/i);
+  assert.match(packagedHtml, /name="viewport"/);
 });
 
 test('top-level navigation requires the exact application host or development origin', () => {

@@ -1,6 +1,7 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const { stripMetaContentSecurityPolicy } = require('./renderer-security.cjs');
 
 const endpoint = process.env.VITE_COLYSEUS_URL?.trim();
 let parsedEndpoint;
@@ -40,6 +41,9 @@ if (result.error) console.error(result.error.message);
 if (result.status !== 0) process.exit(result.status ?? 1);
 
 const rendererDirectory = path.join(__dirname, '..', 'renderer');
+const rendererIndexPath = path.join(rendererDirectory, 'index.html');
+const rendererIndex = fs.readFileSync(rendererIndexPath, 'utf8');
+fs.writeFileSync(rendererIndexPath, stripMetaContentSecurityPolicy(rendererIndex), 'utf8');
 fs.writeFileSync(
   path.join(rendererDirectory, 'desktop-config.json'),
   `${JSON.stringify({ version: 1, colyseusUrl: normalizedEndpoint }, null, 2)}\n`,
