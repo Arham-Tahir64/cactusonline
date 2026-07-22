@@ -24,6 +24,7 @@ npm run server              # single-process server, serving the last client:bui
 npm run desktop:dev         # server + Vite + secure Electron development window
 npm run desktop:test        # Electron shell security/configuration unit tests
 npm run desktop:smoke       # build and launch Electron against a local protocol renderer
+npm run share               # build, host locally, and print a free public Cloudflare Quick Tunnel URL
 ```
 
 ### Runtime configuration
@@ -45,6 +46,10 @@ The beta deployment is intentionally single-replica. Scaling beyond one instance
 **To play during development:** run `npm run dev`, then open **http://localhost:5173** in two or more tabs. Create a game in one tab, join with the `CAC-XXXX` code in the others.
 
 **To play a single-process build:** `npm run client:build && npm run server`, then open **http://localhost:2567**.
+
+**To invite friends for free from your own computer:** run `npm run share`, then
+send them the `https://...trycloudflare.com` URL printed by Cloudflare. Keep the
+terminal and computer online while playing. See [free-friend-play.md](docs/free-friend-play.md).
 
 ## Layout
 

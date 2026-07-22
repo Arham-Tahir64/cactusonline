@@ -21,7 +21,9 @@
     "desktop:smoke": "npm run smoke --prefix desktop",
     "desktop:smoke:packaged": "npm run smoke:packaged --prefix desktop",
     "desktop:capture": "npm run capture:visual --prefix desktop --",
-    "dev": "concurrently -k -n server,client -c blue,green \"npm run server:watch\" \"npm run client:dev\""
+    "dev": "concurrently -k -n server,client -c blue,green \"npm run server:watch\" \"npm run client:dev\"",
+    "tunnel:quick": "node scripts/quick-tunnel.cjs",
+    "share": "npm run client:build && concurrently -k -n server,tunnel -c blue,magenta \"npm run server:watch\" \"npm run tunnel:quick\""
   },
   "devDependencies": {
     "@colyseus/testing": "^0.16.3",
