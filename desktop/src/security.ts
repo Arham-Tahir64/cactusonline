@@ -47,14 +47,17 @@ export function normalizeDevelopmentRendererUrl(value: unknown): string {
 }
 
 export function createContentSecurityPolicy(endpoint: string): string {
-  const websocketOrigin = new URL(normalizeSecureEndpoint(endpoint)).origin;
+  const endpointUrl = new URL(normalizeSecureEndpoint(endpoint));
+  const websocketOrigin = endpointUrl.origin;
+  endpointUrl.protocol = 'https:';
+  const matchmakingOrigin = endpointUrl.origin;
   return [
     "default-src 'self'",
     "script-src 'self'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
-    `connect-src 'self' ${websocketOrigin}`,
+    `connect-src 'self' ${matchmakingOrigin} ${websocketOrigin}`,
     "media-src 'self'",
     "object-src 'none'",
     "base-uri 'none'",

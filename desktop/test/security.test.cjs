@@ -26,9 +26,13 @@ test('development renderer is restricted to local HTTP origins', () => {
   assert.throws(() => normalizeDevelopmentRendererUrl('https://example.test'), /must use http/);
 });
 
-test('CSP permits only the configured WebSocket origin', () => {
+test('CSP permits the configured HTTPS matchmaking and WebSocket origins', () => {
   const policy = createContentSecurityPolicy('wss://game.example.test/socket');
-  assert.match(policy, /connect-src 'self' wss:\/\/game\.example\.test/);
+  assert.match(
+    policy,
+    /connect-src 'self' https:\/\/game\.example\.test wss:\/\/game\.example\.test/,
+  );
+  assert.doesNotMatch(policy, /https:\/\/untrusted\.example\.test/);
   assert.doesNotMatch(policy, /ws:\/\/localhost/);
   assert.match(policy, /object-src 'none'/);
   assert.match(policy, /frame-ancestors 'none'/);

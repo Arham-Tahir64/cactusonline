@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Room } from 'colyseus.js';
 import { client } from './colyseusClient';
+import { formatConnectionError } from './connectionError';
 import type { AvatarId, BoardTarget, Card, RoomView, Scores } from '@engine/types';
 import {
   clearReconnectSession,
@@ -119,7 +120,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
       wireRoom(room, set, get);
       set({ room, screen: 'lobby' });
     } catch (err) {
-      set({ lastError: err instanceof Error ? err.message : String(err) });
+      set({ lastError: formatConnectionError(err) });
     } finally {
       set({ connecting: false });
     }
@@ -132,7 +133,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
       wireRoom(room, set, get);
       set({ room, screen: 'lobby' });
     } catch (err) {
-      set({ lastError: err instanceof Error ? err.message : String(err) });
+      set({ lastError: formatConnectionError(err) });
     } finally {
       set({ connecting: false });
     }

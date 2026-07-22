@@ -1,4 +1,5 @@
 const { spawn, spawnSync } = require('node:child_process');
+const fs = require('node:fs');
 const path = require('node:path');
 
 const desktopRoot = path.join(__dirname, '..');
@@ -20,6 +21,14 @@ const executable = packaged
   ? path.join(desktopRoot, 'out', 'Cactus-win32-x64', 'Cactus.exe')
   : require('electron');
 const args = packaged ? [] : ['.'];
+const packagedConfig = packaged
+  ? JSON.parse(
+      fs.readFileSync(
+        path.join(desktopRoot, 'out', 'Cactus-win32-x64', 'resources', 'renderer', 'desktop-config.json'),
+        'utf8',
+      ),
+    )
+  : null;
 const child = spawn(executable, args, {
   cwd: desktopRoot,
   env: { ...process.env, CACTUS_SMOKE_TEST: '1', ELECTRON_ENABLE_LOGGING: '1' },
@@ -67,7 +76,7 @@ child.on('exit', (code) => {
     popupCount: 0,
     navigationBlocked: true,
     configuredEndpoint: packaged
-      ? 'wss://beta.example.invalid/colyseus'
+      ? packagedConfig.colyseusUrl
       : 'wss://smoke.invalid/colyseus',
   };
   for (const [key, value] of Object.entries(expected)) {
