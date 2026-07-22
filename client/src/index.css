@@ -718,6 +718,10 @@ button:focus-visible {
   --seat-scale: 1.14;
 }
 
+.table-circle[data-player-count='4'] .opponent-seat[data-seat-zone='north'] .player-board {
+  --seat-scale: 0.82;
+}
+
 .table-circle[data-player-count='5'] .player-board,
 .table-circle[data-player-count='6'] .player-board {
   --seat-scale: 0.92;
@@ -1231,7 +1235,7 @@ button:focus-visible {
   position: absolute;
   z-index: 18;
   left: 50%;
-  bottom: clamp(270px, 39vh, 420px);
+  bottom: clamp(250px, 37vh, 540px);
   width: min(48vw, 660px);
   transform: translateX(-50%);
   box-shadow: none;
@@ -1491,7 +1495,7 @@ button:focus-visible {
      clear of the center piles at the minimum desktop viewport. */
   .table-circle[data-player-count='2'] .opponent-seat[data-seat-zone='north'] .seat-avatar {
     top: -80px;
-    left: -50%;
+    left: 50%;
     width: 200px;
     height: 200px;
   }
@@ -1569,7 +1573,7 @@ button:focus-visible {
   .table-circle[data-player-count='3'] .opponent-seat[data-seat-zone='east'],
   .table-circle[data-player-count='4'] .opponent-seat[data-seat-zone='west'],
   .table-circle[data-player-count='4'] .opponent-seat[data-seat-zone='east'] {
-    top: 30% !important;
+    top: 24% !important;
   }
 
   .table-circle[data-player-count='3'] .opponent-seat[data-seat-zone='west'] .seat-avatar,
@@ -1593,7 +1597,7 @@ button:focus-visible {
 
   .table-circle[data-player-count='4'] .opponent-seat[data-seat-zone='north'] .seat-avatar {
     top: -70px;
-    left: -40%;
+    left: 50%;
     width: 190px;
     height: 190px;
   }
@@ -1621,16 +1625,16 @@ button:focus-visible {
 
 .game-stage[data-player-count='7'] .action-bar,
 .game-stage[data-player-count='8'] .action-bar {
-  left: auto;
-  right: 16px;
-  bottom: 16px;
-  width: min(330px, 32vw);
-  transform: none;
+  left: 50%;
+  right: auto;
+  bottom: clamp(250px, 37vh, 540px);
+  width: min(48vw, 660px);
+  transform: translateX(-50%);
 }
 
 .game-stage[data-player-count='7'] .turn-actions > button:not(.stack-action),
 .game-stage[data-player-count='8'] .turn-actions > button:not(.stack-action) {
-  flex: 1 1 44%;
+  flex: 1 1 0;
   min-height: 42px;
   font-size: .72rem;
 }
@@ -1643,6 +1647,7 @@ button:focus-visible {
   font-size: .95rem;
 }
 
+.game-stage[data-player-count='6'] .turn-guide,
 .game-stage[data-player-count='7'] .turn-guide,
 .game-stage[data-player-count='8'] .turn-guide {
   display: none;
@@ -1661,6 +1666,106 @@ button:focus-visible {
   .game-stage[data-player-count='7'] .turn-actions > button:not(.stack-action),
   .game-stage[data-player-count='8'] .turn-actions > button:not(.stack-action) {
     flex: 1 1 0;
+  }
+}
+
+/* High-DPI desktop tables need a second presentation scale. Without it the
+   rail grows to fill 1440p while cards and controls remain capped near their
+   1080p size, leaving a visually empty field. These values retain the same
+   seat geometry while growing the things players actually read and touch. */
+@media (min-width: 2200px) and (min-height: 1200px) {
+  .playing-card.size-sm {
+    width: 6.25rem;
+  }
+
+  .playing-card.size-md {
+    width: 7.8rem;
+  }
+
+  .game-stage[data-player-count='5'] .playing-card.size-sm,
+  .game-stage[data-player-count='6'] .playing-card.size-sm {
+    width: 5.1rem;
+  }
+
+  .game-stage[data-player-count='7'] .playing-card.size-sm,
+  .game-stage[data-player-count='8'] .playing-card.size-sm {
+    width: 4.6rem;
+  }
+
+  .table-circle[data-player-count='6'] .local-seat,
+  .table-circle[data-player-count='7'] .local-seat,
+  .table-circle[data-player-count='8'] .local-seat {
+    top: 76% !important;
+  }
+
+  .seat-avatar {
+    top: -122px;
+    width: 210px;
+    height: 210px;
+  }
+
+  .opponent-seat[data-seat-zone='west'] .seat-avatar,
+  .opponent-seat[data-seat-zone='east'] .seat-avatar {
+    width: 210px;
+    height: 210px;
+  }
+
+  .opponent-seat[data-seat-zone='north'] .seat-avatar {
+    top: -98px;
+    width: 224px;
+    height: 224px;
+  }
+
+  .player-board.me .seat-avatar {
+    top: 22px;
+    left: -122px;
+    width: 278px;
+    height: 278px;
+  }
+
+  .player-nameplate {
+    min-width: 160px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .game-stage[data-player-count] .player-board.me .player-nameplate {
+    top: 234px;
+    left: -192px;
+  }
+
+  .center-pile {
+    gap: 2rem;
+  }
+
+  .action-bar,
+  .game-stage[data-player-count='7'] .action-bar,
+  .game-stage[data-player-count='8'] .action-bar {
+    width: min(48vw, 900px);
+  }
+
+  .turn-actions,
+  .drawn-panel {
+    gap: 1.1rem;
+  }
+
+  .turn-actions > button:not(.stack-action),
+  .game-stage[data-player-count='7'] .turn-actions > button:not(.stack-action),
+  .game-stage[data-player-count='8'] .turn-actions > button:not(.stack-action) {
+    min-height: 68px;
+    font-size: 1.08rem;
+  }
+
+  .turn-guide {
+    width: 430px;
+    min-height: 410px;
+    padding: 26px;
+  }
+}
+
+@media (min-height: 821px) {
+  .game-stage[data-player-count='4'] .player-board.me .seat-avatar {
+    top: 40px;
   }
 }
 

@@ -8,6 +8,10 @@ export default function EventLog() {
   const events = useCactusStore((s) => s.events);
   const view = useCactusStore((s) => s.view);
 
+  // Reload/reconnect restores the authoritative table without replaying old
+  // activity. Do not leave an empty chat-shaped panel behind in that state.
+  if (events.length === 0) return null;
+
   return (
     <div className="event-log">
       {events

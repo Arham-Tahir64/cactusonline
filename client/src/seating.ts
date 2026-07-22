@@ -18,9 +18,9 @@ export const SEAT_LAYOUTS: Record<number, readonly SeatPosition[]> = {
     { left: 83, top: 37 },
   ],
   4: [
-    { left: 50, top: 86 },
+    { left: 50, top: 74 },
     { left: 14, top: 39 },
-    { left: 50, top: 14 },
+    { left: 50, top: 9 },
     { left: 86, top: 39 },
   ],
   5: [

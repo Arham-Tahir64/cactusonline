@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, screen } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client } = require('colyseus.js');
@@ -99,8 +99,8 @@ async function capture() {
     useContentSize: true,
     show: true,
     skipTaskbar: true,
+    frame: false,
     backgroundColor: '#0c0907',
-    titleBarStyle: 'hidden',
     webPreferences: {
       backgroundThrottling: false,
       contextIsolation: true,
@@ -112,6 +112,21 @@ async function capture() {
     },
   });
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+
+  // Windows constrains ordinary windows to the taskbar-adjusted work area.
+  // Fullscreen is required when QA targets the display's complete pixel size
+  // (for example 2560x1440 on a 1440p monitor).
+  const display = screen.getAllDisplays().find((candidate) => (
+    candidate.size.width >= width && candidate.size.height >= height
+  )) ?? screen.getPrimaryDisplay();
+  if (
+    height > display.workAreaSize.height
+    && height <= display.size.height
+    && width <= display.size.width
+  ) {
+    window.setBounds({ x: display.bounds.x, y: display.bounds.y, width, height });
+    window.setFullScreen(true);
+  }
 
   await joinRenderer(host.roomId);
   host.send('start');
