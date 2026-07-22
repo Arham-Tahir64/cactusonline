@@ -1,6 +1,7 @@
 import { useCactusStore } from '../store';
 import { FORCED_MODES } from '../targeting';
 import PlayingCard from './PlayingCard';
+import UiIcon from './UiIcon';
 
 const ACTION_RANKS = new Set(['7', '8', '9', '10', 'J', 'Q']);
 
@@ -28,7 +29,7 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
       {!holding && (
         <div className="turn-actions">
           <button className="draw-action" disabled={!canAct} onClick={() => send('draw-deck')}>
-            <span aria-hidden="true">▱</span> Draw deck
+            <UiIcon name="cards" /> Draw deck
           </button>
           <button
             className="discard-action"
@@ -40,7 +41,7 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
               )
             }
           >
-            <span aria-hidden="true">⇧</span> Take discard
+            <UiIcon name="take" /> Take discard
           </button>
           <button
             className="cactus-action"
@@ -51,7 +52,7 @@ export default function ActionBar({ myTurn }: { myTurn: boolean }) {
               }
             }}
           >
-            <span aria-hidden="true">🌵</span> Call Cactus
+            <UiIcon name="cactus" /> Call Cactus
           </button>
         </div>
       )}

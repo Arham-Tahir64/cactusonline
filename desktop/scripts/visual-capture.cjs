@@ -171,6 +171,7 @@ async function capture() {
     resolutionTier: document.querySelector('.app')?.dataset.resolutionTier ?? null,
     resolutionAspect: document.querySelector('.app')?.dataset.resolutionAspect ?? null,
     displaySettingsAvailable: Boolean(document.querySelector('[aria-label="Settings"]')),
+    gameLogPresent: Boolean(document.querySelector('.event-log')),
   }))()`);
   if (evidence.width !== width || evidence.height !== height) {
     throw new Error(`Electron content size was ${evidence.width}x${evidence.height}, expected ${width}x${height}.`);
@@ -180,6 +181,9 @@ async function capture() {
   }
   if (evidence.phase !== 'playing' || evidence.exposedBoardCards !== 0) {
     throw new Error(`Post-peek concealment failed: ${JSON.stringify(evidence)}.`);
+  }
+  if (evidence.gameLogPresent) {
+    throw new Error(`The removed game log is still rendered: ${JSON.stringify(evidence)}.`);
   }
 
   window.webContents.invalidate();

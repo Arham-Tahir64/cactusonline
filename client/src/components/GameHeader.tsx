@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useCactusStore } from '../store';
 import { usePreferences } from '../preferences';
 import ResolutionSelector from './ResolutionSelector';
+import UiIcon from './UiIcon';
 
 export default function GameHeader() {
   const room = useCactusStore((state) => state.room);
@@ -37,10 +38,10 @@ export default function GameHeader() {
       <header className="game-hud">
         <div className="hud-left">
           <button className="hud-icon menu-button" onClick={leave} aria-label="Leave game" title="Leave game">
-            <span aria-hidden="true">☰</span>
+            <UiIcon name="menu" />
           </button>
           <div className="player-count" title="Players at this table">
-            <span aria-hidden="true">♟</span>
+            <UiIcon name="users" />
             <strong>{view.players.length}</strong>
           </div>
         </div>
@@ -49,17 +50,17 @@ export default function GameHeader() {
           <div><span aria-hidden="true">🌵</span><strong>Cactus</strong><span aria-hidden="true">🌵</span></div>
           <button className="hud-room-code" onClick={() => void copyCode()}>
             {copied ? 'Copied!' : room.roomId}
-            <span aria-hidden="true">▣</span>
+            <UiIcon name="copy" />
           </button>
         </div>
 
         <div className="hud-right">
           <button className="hud-icon" onClick={() => setHelpOpen(true)} aria-label="How to play">?</button>
           <button className="hud-icon" onClick={() => setMuted(!muted)} aria-label={muted ? 'Unmute sound' : 'Mute sound'}>
-            <span aria-hidden="true">{muted ? '🔇' : '🔊'}</span>
+            <UiIcon name={muted ? 'muted' : 'volume'} />
           </button>
           <button className="hud-icon" onClick={() => setSettingsOpen(true)} aria-label="Settings">
-            <span aria-hidden="true">⚙</span>
+            <UiIcon name="settings" />
           </button>
         </div>
       </header>

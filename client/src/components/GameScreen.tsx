@@ -4,7 +4,6 @@ import { nameOf } from '../names';
 import Table from './Table';
 import ActionBar from './ActionBar';
 import Scoreboard from './Scoreboard';
-import EventLog from './EventLog';
 import GameHeader from './GameHeader';
 import TurnGuide from './TurnGuide';
 import { useGameFeedback } from '../useGameFeedback';
@@ -57,9 +56,8 @@ export default function GameScreen() {
 
         <Table />
         <ActionBar myTurn={myTurn} />
-        <TurnGuide myTurn={myTurn} />
+        <TurnGuide />
         {scores && <Scoreboard />}
-        <EventLog />
       </div>
     </section>
   );

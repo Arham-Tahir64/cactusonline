@@ -7,8 +7,8 @@ export default defineConfig({
     pool: 'threads',
     // Server tests open real ports; keep files sequential to avoid collisions.
     fileParallelism: false,
-    // Electron shell checks use Node's built-in test runner after compiling the
-    // CommonJS main process. Do not ask Vitest to collect those files as suites.
-    exclude: [...configDefaults.exclude, 'desktop/test/**'],
+    // Electron shell and hosting utility checks use Node's built-in test
+    // runner. Do not ask Vitest to collect those files as suites.
+    exclude: [...configDefaults.exclude, 'desktop/test/**', 'scripts/**'],
   },
 });

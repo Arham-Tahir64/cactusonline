@@ -2,6 +2,7 @@ import type { RedactedPlayer } from '@engine/types';
 import { useCactusStore } from '../store';
 import { avatarById } from '../avatars';
 import BoardSlot from './BoardSlot';
+import UiIcon from './UiIcon';
 
 interface Props {
   player: RedactedPlayer;
@@ -21,10 +22,10 @@ export default function PlayerBoard({ player, isMe }: Props) {
         <img src={avatar.cutout} alt="" />
       </div>
       <div className="player-nameplate">
-        <span className="player-status-mark" aria-hidden="true">{isMe ? '♛' : '✦'}</span>
+        <span className="player-status-mark" aria-hidden="true"><UiIcon name={isMe ? 'crown' : 'sparkle'} /></span>
         <strong>{isMe ? 'You' : player.name}</strong>
         <span className="cactus-score" title={`${player.board.length} cards`}>
-          🌵 {player.board.length}
+          <UiIcon name="cactus" /> {player.board.length}
         </span>
       </div>
       {(!player.isConnected || player.hasCalledCactus) && (
