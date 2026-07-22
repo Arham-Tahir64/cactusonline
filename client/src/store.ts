@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import type { Room } from 'colyseus.js';
-import { client } from './colyseusClient';
+import { createColyseusClient } from './colyseusClient';
 import { formatConnectionError } from './connectionError';
+import { normalizeQuickTunnelInput } from './endpoint';
+import { saveServerEndpoint } from './serverEndpoint';
 import type { AvatarId, BoardTarget, Card, RoomView, Scores } from '@engine/types';
 import {
   clearReconnectSession,
@@ -52,8 +54,8 @@ interface CactusState {
   restoring: boolean;
   lastError: string | null;
 
-  createGame(name: string, avatarId?: AvatarId): Promise<void>;
-  joinGame(code: string, name: string, avatarId?: AvatarId): Promise<void>;
+  createGame(name: string, avatarId?: AvatarId, serverInput?: string): Promise<void>;
+  joinGame(code: string, name: string, avatarId?: AvatarId, serverInput?: string): Promise<void>;
   restoreGame(): Promise<void>;
   leave(): void;
   send(type: string, payload?: unknown): void;
@@ -113,9 +115,12 @@ export const useCactusStore = create<CactusState>((set, get) => ({
   restoring: false,
   lastError: null,
 
-  async createGame(name, avatarId = 'ranger') {
+  async createGame(name, avatarId = 'ranger', serverInput) {
     set({ connecting: true, lastError: null });
     try {
+      const endpoint = serverInput ? normalizeQuickTunnelInput(serverInput) : undefined;
+      if (endpoint) saveServerEndpoint(endpoint);
+      const client = createColyseusClient(endpoint);
       const room = await client.create('cactus', { name, avatarId });
       wireRoom(room, set, get);
       set({ room, screen: 'lobby' });
@@ -126,9 +131,12 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     }
   },
 
-  async joinGame(code, name, avatarId = 'ranger') {
+  async joinGame(code, name, avatarId = 'ranger', serverInput) {
     set({ connecting: true, lastError: null });
     try {
+      const endpoint = serverInput ? normalizeQuickTunnelInput(serverInput) : undefined;
+      if (endpoint) saveServerEndpoint(endpoint);
+      const client = createColyseusClient(endpoint);
       const room = await client.joinById(code.trim().toUpperCase(), { name, avatarId });
       wireRoom(room, set, get);
       set({ room, screen: 'lobby' });
@@ -145,6 +153,7 @@ export const useCactusStore = create<CactusState>((set, get) => ({
     if (!saved) return;
     set({ restoring: true, connecting: true, lastError: null });
     try {
+      const client = createColyseusClient();
       const room = await client.reconnect(saved.token);
       wireRoom(room, set, get);
       saveReconnectSession(room.reconnectionToken);

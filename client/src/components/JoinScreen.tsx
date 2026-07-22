@@ -2,11 +2,18 @@ import { useState } from 'react';
 import type { AvatarId } from '@engine/types';
 import { useCactusStore } from '../store';
 import { AVATARS } from '../avatars';
+import { packagedServerEndpoint } from '../colyseusClient';
+import { displayServerEndpoint } from '../endpoint';
+import { readServerEndpoint } from '../serverEndpoint';
 
 export default function JoinScreen() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [avatarId, setAvatarId] = useState<AvatarId>('ranger');
+  const isDesktop = location.protocol === 'cactus:';
+  const [serverInput, setServerInput] = useState(() =>
+    displayServerEndpoint(readServerEndpoint() || packagedServerEndpoint),
+  );
   const createGame = useCactusStore((s) => s.createGame);
   const joinGame = useCactusStore((s) => s.joinGame);
   const connecting = useCactusStore((s) => s.connecting);
@@ -40,8 +47,28 @@ export default function JoinScreen() {
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
+      {isDesktop && (
+        <label className="server-link-field">
+          <span>Server link</span>
+          <input
+            type="url"
+            inputMode="url"
+            placeholder="https://your-link.trycloudflare.com"
+            value={serverInput}
+            onChange={(event) => setServerInput(event.target.value)}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+          <small>Paste the newest Cloudflare link from the host.</small>
+        </label>
+      )}
       <div className="join-actions">
-        <button className="primary-action" disabled={connecting} onClick={() => createGame(name, avatarId)}>
+        <button
+          className="primary-action"
+          disabled={connecting || (isDesktop && !serverInput.trim())}
+          onClick={() => createGame(name, avatarId, isDesktop ? serverInput : undefined)}
+        >
           Create a table
         </button>
         <span className="or">or</span>
@@ -52,7 +79,11 @@ export default function JoinScreen() {
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase())}
         />
-        <button className="secondary-action" disabled={connecting || !code} onClick={() => joinGame(code, name, avatarId)}>
+        <button
+          className="secondary-action"
+          disabled={connecting || !code || (isDesktop && !serverInput.trim())}
+          onClick={() => joinGame(code, name, avatarId, isDesktop ? serverInput : undefined)}
+        >
           Join table
         </button>
       </div>

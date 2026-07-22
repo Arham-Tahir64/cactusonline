@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveEndpoint } from './endpoint';
+import { displayServerEndpoint, normalizeQuickTunnelInput, resolveEndpoint } from './endpoint';
 
 describe('resolveEndpoint', () => {
   it('uses and normalizes an explicit WebSocket endpoint', () => {
@@ -41,6 +41,31 @@ describe('resolveEndpoint', () => {
   it('requires an explicit build-time endpoint for the application protocol', () => {
     expect(() => resolveEndpoint({ protocol: 'cactus:', host: 'app' }, undefined, false)).toThrow(
       /secure VITE_COLYSEUS_URL/,
+    );
+  });
+});
+
+describe('Cloudflare quick-tunnel input', () => {
+  it('accepts friendly HTTPS links and converts them for Colyseus', () => {
+    expect(normalizeQuickTunnelInput('https://cactus-table.trycloudflare.com/')).toBe(
+      'wss://cactus-table.trycloudflare.com',
+    );
+    expect(normalizeQuickTunnelInput('cactus-table.trycloudflare.com')).toBe(
+      'wss://cactus-table.trycloudflare.com',
+    );
+  });
+
+  it('rejects untrusted or ambiguous endpoints', () => {
+    expect(() => normalizeQuickTunnelInput('https://example.com')).toThrow(/trycloudflare/);
+    expect(() => normalizeQuickTunnelInput('http://cactus.trycloudflare.com')).toThrow(/https/);
+    expect(() => normalizeQuickTunnelInput('https://cactus.trycloudflare.com/?token=secret')).toThrow(
+      /query parameters/,
+    );
+  });
+
+  it('presents packaged WebSocket endpoints as pasteable HTTPS links', () => {
+    expect(displayServerEndpoint('wss://cactus-table.trycloudflare.com')).toBe(
+      'https://cactus-table.trycloudflare.com',
     );
   });
 });

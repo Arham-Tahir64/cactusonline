@@ -57,7 +57,7 @@ export function createContentSecurityPolicy(endpoint: string): string {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
-    `connect-src 'self' ${matchmakingOrigin} ${websocketOrigin}`,
+    `connect-src 'self' ${matchmakingOrigin} ${websocketOrigin} https://*.trycloudflare.com wss://*.trycloudflare.com`,
     "media-src 'self'",
     "object-src 'none'",
     "base-uri 'none'",

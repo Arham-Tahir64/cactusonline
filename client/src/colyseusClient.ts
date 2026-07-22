@@ -1,6 +1,14 @@
 import { Client } from 'colyseus.js';
 import { resolveEndpoint } from './endpoint';
+import { readServerEndpoint } from './serverEndpoint';
 
-const endpoint = resolveEndpoint(location, import.meta.env.VITE_COLYSEUS_URL, import.meta.env.DEV);
+export const packagedServerEndpoint = import.meta.env.VITE_COLYSEUS_URL;
 
-export const client = new Client(endpoint);
+export function createColyseusClient(endpointOverride?: string): Client {
+  const endpoint = resolveEndpoint(
+    location,
+    endpointOverride || readServerEndpoint() || packagedServerEndpoint,
+    import.meta.env.DEV,
+  );
+  return new Client(endpoint);
+}
